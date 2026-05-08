@@ -1,5 +1,6 @@
 const express = require("express");
 const { sendSuccess } = require("../utils/apiResponse");
+const dashboardRoutes = require("./dashboardRoutes");
 
 const router = express.Router();
 
@@ -10,8 +11,6 @@ router.get("/", (req, res) => {
   });
 });
 
-// Add feature routes here as modules are implemented.
-// Example:
-// router.use("/admin/orphans", require("./orphansRoutes"));
+router.use("/admin/dashboard", dashboardRoutes);
 
 module.exports = router;
