@@ -22,9 +22,6 @@ build/
 tmp/
 temp/
 
-# Local admin docs
-src/docs/admin/
-
 # Coverage
 coverage/
 
