@@ -30,6 +30,44 @@ const schemas = {
       version: { type: "string", example: "1.0.0" },
     },
   },
+  AuthUser: {
+    type: "object",
+    properties: {
+      id: { type: "string", example: "facebook:123456789" },
+      provider: { type: "string", example: "facebook" },
+      name: { type: "string", example: "Facebook User" },
+      email: { type: "string", nullable: true, example: "user@example.com" },
+      role: { type: "string", example: "user" },
+    },
+  },
+  CurrentUserResponse: {
+    type: "object",
+    required: ["success", "message", "data"],
+    properties: {
+      success: { type: "boolean", example: true },
+      message: { type: "string", example: "Success" },
+      data: {
+        type: "object",
+        required: ["user"],
+        properties: {
+          user: { $ref: "#/components/schemas/AuthUser" },
+        },
+      },
+    },
+    example: {
+      success: true,
+      message: "Success",
+      data: {
+        user: {
+          id: "facebook:123456789",
+          provider: "facebook",
+          name: "Facebook User",
+          email: "user@example.com",
+          role: "user",
+        },
+      },
+    },
+  },
   OrphanSummary: {
     type: "object",
     properties: {
