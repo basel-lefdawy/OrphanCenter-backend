@@ -1,89 +1,92 @@
 const HelpRequestService = require('../services/helpRequestService');
 
 // CREATE
-async function createRequest (req, res){
+const createRequest = async (req, res) => {
   try {
     const data = await HelpRequestService.create(req.body);
-    res.status(201).json(data);
+    return res.status(201).json(data);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 
 // GET ALL
-async function getAllRequests (req, res) {
+const getAllRequests = async (req, res) => {
   try {
     const data = await HelpRequestService.getAll();
-    res.json(data);
+    return res.json(data);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 
 // GET PENDING
-async function getPendingRequests (req, res){
+const getPendingRequests = async (req, res) => {
   try {
     const data = await HelpRequestService.getPending();
-    res.json(data);
+    return res.json(data);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 
 // GET ONE
-async function getRequestById (req, res) {
+const getRequestById = async (req, res) => {
   try {
     const data = await HelpRequestService.getById(req.params.id);
     if (!data) return res.status(404).json({ message: "Not found" });
-    res.json(data);
+
+    return res.json(data);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 
 // UPDATE
-async function updateRequest (req, res) {
+const updateRequest = async (req, res) => {
   try {
     const data = await HelpRequestService.update(req.params.id, req.body);
     if (!data) return res.status(404).json({ message: "Not found" });
-    res.json(data);
+
+    return res.json(data);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 
 // DELETE
-async function deleteRequest (req, res) {
+const deleteRequest = async (req, res) => {
   try {
     const data = await HelpRequestService.delete(req.params.id);
     if (!data) return res.status(404).json({ message: "Not found" });
-    res.json({ success: true });
+
+    return res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 
 // APPROVE
-async function approveRequest (req, res) {
+const approveRequest = async (req, res) => {
   try {
     const data = await HelpRequestService.approve(req.params.id);
-    res.json(data);
+    return res.json(data);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 
 // REJECT
-async function rejectRequest (req, res) {
+const rejectRequest = async (req, res) => {
   try {
     const data = await HelpRequestService.reject(req.params.id);
-    res.json(data);
+    return res.json(data);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    return res.status(500).json({ message: err.message });
   }
 };
 
-module.exports={
+module.exports = {
   createRequest,
   getAllRequests,
   getPendingRequests,
@@ -92,4 +95,4 @@ module.exports={
   deleteRequest,
   approveRequest,
   rejectRequest
-}
+};
