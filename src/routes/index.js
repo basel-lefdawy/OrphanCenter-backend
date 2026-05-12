@@ -4,6 +4,7 @@ const { sendSuccess } = require("../utils/apiResponse");
 const dashboardRoutes = require("./dashboardRoutes");
 const helpRequestRoutes = require("./helpRequestRoutes");
 const helpRequestAdminRoutes = require("./helpRequestAdminRoutes");
+const donationRoutes = require("./donationRoutes");
 
 const router = express.Router();
 
@@ -13,6 +14,8 @@ router.get("/", (req, res) => {
     version: "1.0.0",
   });
 });
+
+router.use("/donations", donationRoutes);
 
 // PUBLIC
 router.use("/help-requests", helpRequestRoutes);

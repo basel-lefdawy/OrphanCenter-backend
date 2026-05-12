@@ -6,6 +6,7 @@ const { sequelize } = require("./config/db");
 require("./models/orphans/orphans");
 require("./models/guardian/guardian");
 require("./models/helpRequests/helpRequests");
+require("./models/donations/donations");
 
 const PORT = process.env.PORT || 5000;
 
