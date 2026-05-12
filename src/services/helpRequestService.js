@@ -6,13 +6,14 @@ const Guardian = require("../models/guardian/guardian");
 
 const { decrypt } = require("../utils/crypto");
 
+
 // CREATE
 const create = async (data) => {
   return await HelpRequest.create(data);
 };
 
 
-// GET ALL (DECRYPT HERE)
+// GET ALL (DECRYPT)
 const getAll = async () => {
   const data = await HelpRequest.findAll({
     order: [["createdAt", "DESC"]],
@@ -49,10 +50,10 @@ const getPending = async () => {
 };
 
 
-
 // GET BY ID (DECRYPT)
 const getById = async (id) => {
   const req = await HelpRequest.findByPk(id);
+
   if (!req) return null;
 
   const obj = req.toJSON();
@@ -64,31 +65,47 @@ const getById = async (id) => {
   };
 };
 
+
 // UPDATE
 const update = async (id, data) => {
   const request = await HelpRequest.findByPk(id);
+
   if (!request) return null;
 
   await request.update(data);
+
   return request;
 };
+
 
 // DELETE
 const remove = async (id) => {
   const request = await HelpRequest.findByPk(id);
+
   if (!request) return null;
 
   await request.destroy();
+
   return true;
 };
 
-// APPROVE 
+
+// APPROVE (FIXED SAFE VERSION)
 const approve = async (id) => {
   const t = await sequelize.transaction();
 
   try {
-    const req = await HelpRequest.findByPk(id);
-    if (!req) return null;
+    const req = await HelpRequest.findByPk(id, { transaction: t });
+
+    if (!req) {
+      await t.rollback();
+      return null;
+    }
+
+    if (req.status === "Approved") {
+      await t.rollback();
+      throw new Error("Request already approved");
+    }
 
     // update status
     await req.update(
@@ -107,6 +124,7 @@ const approve = async (id) => {
         Relation: req.Relation,
         country: req.country,
         city: req.city,
+        street: req.street,
         phoneNumber: req.phoneNumber,
         email: req.email,
       },
@@ -141,14 +159,22 @@ const approve = async (id) => {
   }
 };
 
-//REJECT
+
+// REJECT
 const reject = async (id) => {
   const request = await HelpRequest.findByPk(id);
+
   if (!request) return null;
 
+  if (request.status === "Rejected") {
+    throw new Error("Request already rejected");
+  }
+
   await request.update({ status: "Rejected" });
+
   return request;
 };
+
 
 module.exports = {
   create,
