@@ -1,6 +1,7 @@
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const schemas = require("./swaggerSchemas");
+const sponsorSponsorshipPaths = require("./swaggerPathsSponsorsSponsorships");
 
 const swaggerDefinition = {
   openapi: "3.0.0",
@@ -30,6 +31,8 @@ const swaggerDefinition = {
     { name: "System", description: "Health and API root checks" },
     { name: "Auth", description: "Facebook OAuth and JWT auth routes" },
     { name: "Admin Dashboard", description: "Admin dashboard summary" },
+    { name: "Sponsors", description: "Sponsors (الكفّال) CRUD and nested sponsorships" },
+    { name: "Sponsorships", description: "Sponsorships (الكفالات) CRUD and status" },
   ],
   paths: {
     "/health": {
@@ -195,6 +198,7 @@ const swaggerDefinition = {
         },
       },
     },
+    ...sponsorSponsorshipPaths,
   },
 };
 
