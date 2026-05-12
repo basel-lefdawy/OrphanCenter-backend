@@ -8,7 +8,7 @@ const swaggerDefinition = {
     title: "OrphanCenter API",
     version: "1.0.0",
     description:
-      "Initial Swagger documentation for the currently wired backend routes. Admin routes are documented with Bearer auth as the expected protection, even if auth is not fully wired yet.",
+      "Initial Swagger documentation for the currently wired backend routes. Some admin endpoints are stabilized for frontend integration before all related data models are fully implemented.",
   },
   servers: [
     {
@@ -70,11 +70,11 @@ const swaggerDefinition = {
         tags: ["Admin Dashboard"],
         summary: "Get admin dashboard summary",
         description:
-          "Returns aggregate dashboard data for the admin page. This route should be protected with Bearer JWT auth when authentication is ready.",
-        security: [{ bearerAuth: [] }],
+          "Returns the current Admin Dashboard summary response. The response data includes counts, helpRequestStatuses, totalDonations, sponsorshipRate, recent.orphans, recent.donations, and warnings. This endpoint is temporary-safe: if optional Sponsor or Donation models are not implemented yet, their values fall back to empty data and warnings explain the fallback. This route is not currently protected in the mounted Express routes.",
         responses: {
           200: {
-            description: "Dashboard summary",
+            description:
+              "Dashboard summary matching the current backend response shape, including fallback warnings when optional dashboard data sources are unavailable.",
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/DashboardResponse" },

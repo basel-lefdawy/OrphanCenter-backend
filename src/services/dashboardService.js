@@ -4,21 +4,92 @@ const Sponsor = require("../models/sponsors/sponsors");
 const Donation = require("../models/donations/donations");
 const HelpRequest = require("../models/helpRequests/helpRequests");
 
+const HELP_REQUEST_STATUS = {
+  PENDING: "Pending",
+  APPROVED: "Approved",
+  REJECTED: "Rejected",
+};
+// Helper function to check if a model is found and queryable
+function isQueryableModel(model) {
+  return model && typeof model.findAll === "function";
+}
+
+function getErrorMessage(error) {
+  return error?.message || error?.name || "Unknown database/query error";
+}
+
+async function safeFindAll(model, modelName) {
+  if (!isQueryableModel(model)) {
+    return {
+      records: [],
+      warning: `${modelName} model is not implemented yet`,
+    };
+  }
+
+  try {
+    const records = await model.findAll({ order: [["id", "DESC"]] });
+    return { records, warning: null };
+  } catch (error) {
+    return {
+      records: [],
+      warning: `${modelName} query failed: ${getErrorMessage(error)}`,
+    };
+  }
+}
+
+async function safeSponsoredOrphanCount() {
+  if (!Orphan || typeof Orphan.count !== "function") {
+    return {
+      count: 0,
+      warning: "Orphan model is not implemented yet",
+    };
+  }
+
+  if (!Orphan.rawAttributes || !Orphan.rawAttributes.sponsorId) {
+    return {
+      count: 0,
+      warning: "Orphan model does not define sponsorId; sponsored count defaults to 0",
+    };
+  }
+
+  try {
+    const count = await Orphan.count({
+      where: {
+        sponsorId: {
+          [Op.ne]: null,
+        },
+      },
+    });
+
+    return { count, warning: null };
+  } catch (error) {
+    return {
+      count: 0,
+      warning: `Sponsored orphan count failed: ${getErrorMessage(error)}`,
+    };
+  }
+}
+
 async function getDashboardSummary() {
-  const [orphans, sponsors, donations, helpRequests] = await Promise.all([
-    Orphan.findAll({ order: [["id", "DESC"]] }),
-    Sponsor.findAll({ order: [["id", "DESC"]] }),
-    Donation.findAll({ order: [["id", "DESC"]] }),
-    HelpRequest.findAll({ order: [["id", "DESC"]] }),
+  const [
+    orphansResult,
+    sponsorsResult,
+    donationsResult,
+    helpRequestsResult,
+    sponsoredCountResult,
+  ] = await Promise.all([
+    safeFindAll(Orphan, "Orphan"),
+    safeFindAll(Sponsor, "Sponsor"),
+    safeFindAll(Donation, "Donation"),
+    safeFindAll(HelpRequest, "HelpRequest"),
+    safeSponsoredOrphanCount(),
   ]);
 
-  const sponsoredCount = await Orphan.count({
-    where: {
-      sponsorId: {
-        [Op.ne]: null,
-      },
-    },
-  });
+  const orphans = orphansResult.records;
+  const sponsors = sponsorsResult.records;
+  const donations = donationsResult.records;
+  const helpRequests = helpRequestsResult.records;
+  const sponsoredCount = sponsoredCountResult.count;
 
   const totalDonations = donations.reduce(
     (sum, donation) => sum + Number(donation.amount || 0),
@@ -26,8 +97,26 @@ async function getDashboardSummary() {
   );
 
   const pendingRequests = helpRequests.filter(
-    (request) => request.status === "قيد المراجعة"
+    (request) => request.status === HELP_REQUEST_STATUS.PENDING
   );
+
+  const helpRequestStatuses = helpRequests.reduce(
+    (acc, request) => {
+      if (request.status === HELP_REQUEST_STATUS.PENDING) acc.pending += 1;
+      if (request.status === HELP_REQUEST_STATUS.APPROVED) acc.approved += 1;
+      if (request.status === HELP_REQUEST_STATUS.REJECTED) acc.rejected += 1;
+      return acc;
+    },
+    { pending: 0, approved: 0, rejected: 0 }
+  );
+
+  const warnings = [
+    orphansResult.warning,
+    sponsorsResult.warning,
+    donationsResult.warning,
+    helpRequestsResult.warning,
+    sponsoredCountResult.warning,
+  ].filter(Boolean);
 
   return {
     counts: {
@@ -38,6 +127,7 @@ async function getDashboardSummary() {
       sponsoredOrphans: sponsoredCount,
       pendingHelpRequests: pendingRequests.length,
     },
+    helpRequestStatuses,
     totalDonations,
     sponsorshipRate:
       orphans.length > 0 ? Math.round((sponsoredCount / orphans.length) * 100) : 0,
@@ -45,6 +135,7 @@ async function getDashboardSummary() {
       orphans: orphans.slice(0, 4),
       donations: donations.slice(0, 4),
     },
+    warnings,
   };
 }
 
