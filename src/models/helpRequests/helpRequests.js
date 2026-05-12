@@ -1,9 +1,19 @@
 const { DataTypes } = require("sequelize");
 const { sequelize } = require("../../config/db");
-const { encrypt, decrypt } = require("../../utils/crypto");
+const { encrypt } = require("../../utils/crypto");
 
 const HelpRequest = sequelize.define("HelpRequest", {
-  OrphanID: DataTypes.STRING,
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+
+  OrphanID: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+
   OrphanName: DataTypes.STRING,
   OrphanFatherName: DataTypes.STRING,
   OrphanGrandfatherName: DataTypes.STRING,
@@ -13,7 +23,11 @@ const HelpRequest = sequelize.define("HelpRequest", {
   gender: DataTypes.STRING,
   GuaranteeType: DataTypes.STRING,
 
-  GuardianID: DataTypes.STRING,
+  GuardianID: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+
   GuardianName: DataTypes.STRING,
   GuardianFatherName: DataTypes.STRING,
   GuardianGrandfatherName: DataTypes.STRING,
@@ -41,6 +55,7 @@ const HelpRequest = sequelize.define("HelpRequest", {
   },
 });
 
+// encryption
 HelpRequest.beforeCreate((request) => {
   if (request.IBAN) request.IBAN = encrypt(request.IBAN);
   if (request.bankAccount) request.bankAccount = encrypt(request.bankAccount);
