@@ -1,5 +1,6 @@
 const sponsorshipService = require("../services/sponsorshipService");
 const { getClientErrorMessage } = require("../utils/errorMessage");
+const { sponsorShipSchema } = require("../schemas/sponsorShipSchema");
 
 const getAllSponsorships = async (req, res) => {
   try {
@@ -38,7 +39,8 @@ const getSponsorshipsBySponsor = async (req, res) => {
 
 const createSponsorship = async (req, res) => {
   try {
-    const sponsorship = await sponsorshipService.create(req.body);
+    const validatedData = sponsorShipSchema.parse(req.body);
+    const sponsorship = await sponsorshipService.create(validatedData);
     res.status(201).json({ success: true, data: sponsorship });
   } catch (error) {
     const status = error.statusCode || 500;
@@ -48,7 +50,8 @@ const createSponsorship = async (req, res) => {
 
 const updateSponsorship = async (req, res) => {
   try {
-    const sponsorship = await sponsorshipService.update(req.params.id, req.body);
+    const validatedData = sponsorShipSchema.partial().parse(req.body);
+    const sponsorship = await sponsorshipService.update(req.params.id, validatedData);
     res.status(200).json({ success: true, data: sponsorship });
   } catch (error) {
     const status = error.statusCode || 500;
@@ -68,14 +71,24 @@ const deleteSponsorship = async (req, res) => {
 
 const updateSponsorshipStatus = async (req, res) => {
   try {
+    const validatedData = sponsorShipSchema.partial().parse(req.body);
+
     const sponsorship = await sponsorshipService.updateStatus(
       req.params.id,
-      req.body.status
+      validatedData.status
     );
-    res.status(200).json({ success: true, data: sponsorship });
+
+    res.status(200).json({
+      success: true,
+      data: sponsorship,
+    });
   } catch (error) {
     const status = error.statusCode || 500;
-    res.status(status).json({ success: false, message: getClientErrorMessage(error) });
+
+    res.status(status).json({
+      success: false,
+      message: getClientErrorMessage(error),
+    });
   }
 };
 
