@@ -23,8 +23,9 @@ function facebookCallback(req, res) {
   }
 
   const token = signAuthToken(req.user);
-  const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
-  const redirectUrl = new URL("/auth/facebook/success", clientUrl);
+  const clientUrl = process.env.CLIENT_URL || "http://localhost:5173/orphanage-center";
+  const redirectUrl = new URL(clientUrl);
+  redirectUrl.pathname = `${redirectUrl.pathname.replace(/\/$/, "")}/auth/facebook/success`;
   redirectUrl.searchParams.set("token", token);
 
   return res.redirect(redirectUrl.toString());

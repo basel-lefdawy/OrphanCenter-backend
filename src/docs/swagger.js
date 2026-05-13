@@ -31,6 +31,8 @@ const swaggerDefinition = {
     { name: "System", description: "Health and API root checks" },
     { name: "Auth", description: "Facebook OAuth and JWT auth routes" },
     { name: "Admin Dashboard", description: "Admin dashboard summary" },
+    { name: "Help Requests", description: "Public help request submission and lookup" },
+    { name: "Admin Help Requests", description: "Admin help request review workflow" },
     { name: "Sponsors", description: "Sponsors (الكفّال) CRUD and nested sponsorships" },
     { name: "Sponsorships", description: "Sponsorships (الكفالات) CRUD and status" },
   ],
@@ -189,6 +191,348 @@ const swaggerDefinition = {
           },
           500: {
             description: "Server error",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/help-requests": {
+      get: {
+        tags: ["Help Requests"],
+        summary: "List help requests",
+        description: "Returns all help requests using the currently mounted public route.",
+        responses: {
+          200: {
+            description: "List of help requests.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/HelpRequestSuccessList" },
+              },
+            },
+          },
+          500: {
+            description: "Server error.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+        },
+      },
+      post: {
+        tags: ["Help Requests"],
+        summary: "Create help request",
+        description:
+          "Submits a public help request. IBAN and bankAccount are required when paymentMethod is BankAccount.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/HelpRequestCreateBody" },
+            },
+          },
+        },
+        responses: {
+          201: {
+            description: "Help request created.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/HelpRequestSuccessOne" },
+              },
+            },
+          },
+          400: {
+            description: "Validation error.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+          500: {
+            description: "Server error.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/help-requests/{id}": {
+      get: {
+        tags: ["Help Requests"],
+        summary: "Get help request by id",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Help request found.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/HelpRequest" },
+              },
+            },
+          },
+          404: {
+            description: "Help request not found.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+          500: {
+            description: "Server error.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/admin/help-requests": {
+      get: {
+        tags: ["Admin Help Requests"],
+        summary: "List admin help requests",
+        description: "Returns all help requests for admin review.",
+        responses: {
+          200: {
+            description: "List of help requests.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/HelpRequestSuccessList" },
+              },
+            },
+          },
+          500: {
+            description: "Server error.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/admin/help-requests/pending": {
+      get: {
+        tags: ["Admin Help Requests"],
+        summary: "List pending help requests",
+        responses: {
+          200: {
+            description: "List of pending help requests.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/HelpRequestSuccessList" },
+              },
+            },
+          },
+          500: {
+            description: "Server error.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/admin/help-requests/{id}": {
+      get: {
+        tags: ["Admin Help Requests"],
+        summary: "Get admin help request by id",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Help request found.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/HelpRequest" },
+              },
+            },
+          },
+          404: {
+            description: "Help request not found.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+          500: {
+            description: "Server error.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+        },
+      },
+      patch: {
+        tags: ["Admin Help Requests"],
+        summary: "Update help request",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/HelpRequestUpdateBody" },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: "Help request updated.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/HelpRequest" },
+              },
+            },
+          },
+          404: {
+            description: "Help request not found.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+          500: {
+            description: "Server error.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+        },
+      },
+      delete: {
+        tags: ["Admin Help Requests"],
+        summary: "Delete help request",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Help request deleted.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/HelpRequestDeleteResponse" },
+              },
+            },
+          },
+          404: {
+            description: "Help request not found.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+          500: {
+            description: "Server error.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/admin/help-requests/{id}/approve": {
+      patch: {
+        tags: ["Admin Help Requests"],
+        summary: "Approve help request",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Help request approved.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/HelpRequestSuccessOne" },
+              },
+            },
+          },
+          500: {
+            description: "Server error.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/admin/help-requests/{id}/reject": {
+      patch: {
+        tags: ["Admin Help Requests"],
+        summary: "Reject help request",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Help request rejected.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/HelpRequest" },
+              },
+            },
+          },
+          500: {
+            description: "Server error.",
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/ApiError" },
