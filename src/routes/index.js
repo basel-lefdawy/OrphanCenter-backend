@@ -1,9 +1,19 @@
 const express = require("express");
 const { sendSuccess } = require("../utils/apiResponse");
+
 const authRoutes = require("./authRoutes");
+const socialAuthRoutes = require("./socialAuthRoutes");
 const dashboardRoutes = require("./dashboardRoutes");
+const requireAuth = require("../middleware/requireAuth");
+const requireAdmin = require("../middleware/requireAdmin");
+
 const helpRequestRoutes = require("./helpRequestRoutes");
 const orphanRoutes = require("./orphanRoutes");
+const helpRequestAdminRoutes = require("./helpRequestAdminRoutes");
+const donationRoutes = require("./donationRoutes");
+
+const sponsorRoutes = require("./SponsorRoutes");
+const sponsorShipRoutes = require("./SponsorShipRoutes");
 
 const router = express.Router();
 
@@ -14,9 +24,23 @@ router.get("/", (req, res) => {
   });
 });
 
+router.use("/donations", donationRoutes);
+
+// PUBLIC
 router.use("/auth", authRoutes);
+router.use("/auth", socialAuthRoutes);
 router.use("/admin/dashboard", dashboardRoutes);
+
 router.use("/help-requests", helpRequestRoutes);
 router.use("/orphans", orphanRoutes);
+
+router.use("/sponsors", sponsorRoutes);
+
+router.use("/sponsorships", sponsorShipRoutes);
+
+// ADMIN
+router.use("/admin/dashboard", requireAuth, requireAdmin, dashboardRoutes);
+
+router.use("/admin/help-requests", requireAuth, requireAdmin, helpRequestAdminRoutes);
 
 module.exports = router;
