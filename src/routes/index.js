@@ -3,6 +3,8 @@ const { sendSuccess } = require("../utils/apiResponse");
 
 const authRoutes = require("./authRoutes");
 const dashboardRoutes = require("./dashboardRoutes");
+const requireAuth = require("../middleware/requireAuth");
+const requireAdmin = require("../middleware/requireAdmin");
 
 const helpRequestRoutes = require("./helpRequestRoutes");
 const helpRequestAdminRoutes = require("./helpRequestAdminRoutes");
@@ -32,8 +34,8 @@ router.use("/sponsors", sponsorRoutes);
 router.use("/sponsorships", sponsorShipRoutes);
 
 // ADMIN
-router.use("/admin/dashboard", dashboardRoutes);
+router.use("/admin/dashboard", requireAuth, requireAdmin, dashboardRoutes);
 
-router.use("/admin/help-requests", helpRequestAdminRoutes);
+router.use("/admin/help-requests", requireAuth, requireAdmin, helpRequestAdminRoutes);
 
 module.exports = router;

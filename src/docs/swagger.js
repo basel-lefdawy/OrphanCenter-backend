@@ -162,7 +162,8 @@ const swaggerDefinition = {
         tags: ["Admin Dashboard"],
         summary: "Get admin dashboard summary",
         description:
-          "Returns the current Admin Dashboard summary response. The response data includes counts, helpRequestStatuses, totalDonations, sponsorshipRate, recent.orphans, recent.donations, and warnings. This endpoint is temporary-safe: if optional Sponsor or Donation models are not implemented yet, their values fall back to empty data and warnings explain the fallback. This route is not currently protected in the mounted Express routes.",
+          "Returns the current Admin Dashboard summary response. The response data includes counts, helpRequestStatuses, totalDonations, sponsorshipRate, recent.orphans, recent.donations, and warnings. This endpoint is temporary-safe: if optional Sponsor or Donation models are not implemented yet, their values fall back to empty data and warnings explain the fallback. This route is protected by JWT authentication and admin authorization.",
+        security: [{ bearerAuth: [] }],
         responses: {
           200: {
             description:
