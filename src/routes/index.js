@@ -8,6 +8,7 @@ const requireAuth = require("../middleware/requireAuth");
 const requireAdmin = require("../middleware/requireAdmin");
 
 const helpRequestRoutes = require("./helpRequestRoutes");
+const orphanRoutes = require("./orphanRoutes");
 const helpRequestAdminRoutes = require("./helpRequestAdminRoutes");
 const donationRoutes = require("./donationRoutes");
 
@@ -31,6 +32,7 @@ router.use("/auth", socialAuthRoutes);
 router.use("/admin/dashboard", dashboardRoutes);
 
 router.use("/help-requests", helpRequestRoutes);
+router.use("/orphans", orphanRoutes);
 
 router.use("/sponsors", sponsorRoutes);
 
