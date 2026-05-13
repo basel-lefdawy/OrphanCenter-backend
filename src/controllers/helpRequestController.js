@@ -57,7 +57,7 @@ const updateRequest = async (req, res) => {
 // DELETE
 const deleteRequest = async (req, res) => {
   try {
-    const data = await HelpRequestService.delete(req.params.id);
+    const data = await HelpRequestService.remove(req.params.id);
     if (!data) return res.status(404).json({ message: "Not found" });
 
     return res.json({ success: true });
