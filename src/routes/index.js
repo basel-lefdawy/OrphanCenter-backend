@@ -6,6 +6,7 @@ const dashboardRoutes = require("./dashboardRoutes");
 
 const helpRequestRoutes = require("./helpRequestRoutes");
 const helpRequestAdminRoutes = require("./helpRequestAdminRoutes");
+const donationRoutes = require("./donationRoutes");
 
 const sponsorRoutes = require("./SponsorRoutes");
 const sponsorShipRoutes = require("./SponsorShipRoutes");
@@ -18,6 +19,8 @@ router.get("/", (req, res) => {
     version: "1.0.0",
   });
 });
+
+router.use("/donations", donationRoutes);
 
 // PUBLIC
 router.use("/auth", authRoutes);

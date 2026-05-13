@@ -41,7 +41,6 @@ const helpRequestSchema = z.object({
   bankAccount: z.string().regex(/^\d{6,30}$/).optional(),
 })
 .refine((data) => {
-  // إذا BankAccount لازم بيانات بنك
   if (data.paymentMethod === "BankAccount") {
     return !!data.IBAN && !!data.bankAccount;
   }
