@@ -2,6 +2,7 @@ const express = require("express");
 const { sendSuccess } = require("../utils/apiResponse");
 
 const authRoutes = require("./authRoutes");
+const socialAuthRoutes = require("./socialAuthRoutes");
 const dashboardRoutes = require("./dashboardRoutes");
 const requireAuth = require("../middleware/requireAuth");
 const requireAdmin = require("../middleware/requireAdmin");
@@ -26,6 +27,8 @@ router.use("/donations", donationRoutes);
 
 // PUBLIC
 router.use("/auth", authRoutes);
+router.use("/auth", socialAuthRoutes);
+router.use("/admin/dashboard", dashboardRoutes);
 
 router.use("/help-requests", helpRequestRoutes);
 

@@ -9,6 +9,8 @@ require("./models/helpRequests/helpRequests");
 require("./models/donations/donations");
 require("./models/sponsors/sponsors");
 require("./models/sponsorShip/sponsorShip");
+require("./models/auth/user");
+require("./models/auth/RefreshToken");
 
 const PORT = process.env.PORT || 5000;
 
