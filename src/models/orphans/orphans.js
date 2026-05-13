@@ -10,7 +10,6 @@ const Orphan = sequelize.define("Orphan", {
   OrphanBirthDate: DataTypes.DATE,
   gender: DataTypes.STRING,
   GuaranteeType: DataTypes.STRING,
-
   GuardianID: DataTypes.STRING,
   RequestID: DataTypes.INTEGER,
 });
