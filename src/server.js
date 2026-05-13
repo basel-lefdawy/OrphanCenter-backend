@@ -3,13 +3,8 @@ require("dotenv").config();
 const app = require("./app");
 const { sequelize } = require("./config/db");
 
-require("./models/orphans/orphans");
-require("./models/guardian/guardian");
-require("./models/helpRequests/helpRequests");
-require("./models/donations/donations");
-require("./models/sponsors/sponsors");
-require("./models/sponsorShip/sponsorShip");
 
+require("./models");
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
