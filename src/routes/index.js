@@ -11,7 +11,6 @@ const helpRequestRoutes = require("./helpRequestRoutes");
 const orphanRoutes = require("./orphanRoutes");
 const helpRequestAdminRoutes = require("./helpRequestAdminRoutes");
 const donationRoutes = require("./donationRoutes");
-
 const sponsorRoutes = require("./SponsorRoutes");
 const sponsorShipRoutes = require("./SponsorShipRoutes");
 
@@ -35,10 +34,11 @@ router.use("/help-requests", helpRequestRoutes);
 router.use("/orphans", orphanRoutes);
 
 router.use("/sponsors", sponsorRoutes);
-
 router.use("/sponsorships", sponsorShipRoutes);
 
 // ADMIN
+router.use("/admin/dashboard", dashboardRoutes);
+router.use("/admin/help-requests", helpRequestAdminRoutes);
 router.use("/admin/dashboard", requireAuth, requireAdmin, dashboardRoutes);
 
 router.use("/admin/help-requests", requireAuth, requireAdmin, helpRequestAdminRoutes);
