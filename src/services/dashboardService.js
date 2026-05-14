@@ -1,6 +1,6 @@
 const { Op } = require("sequelize");
 const Orphan = require("../models/orphans/orphans");
-const Sponsor = require("../models/sponsors/sponsors");
+const { Sponsor } = require("../models");
 const Donation = require("../models/donations/donations");
 const HelpRequest = require("../models/helpRequests/helpRequests");
 

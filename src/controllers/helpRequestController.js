@@ -154,14 +154,9 @@ const updateRequest = async (req, res) => {
 // DELETE
 const deleteRequest = async (req, res) => {
   try {
-
-    const data =
-      await HelpRequestService.remove(
-        req.params.id
-      );
+    const data = await HelpRequestService.remove(req.params.id);
 
     if (!data) {
-
       return res.status(404).json({
         message: "الطلب غير موجود",
       });
@@ -224,10 +219,11 @@ const rejectRequest = async (req, res) => {
 module.exports = {
   createRequest,
   getAllRequests,
- getPendingRequests,
+  getPendingRequests,
   getRequestById,
   updateRequest,
   deleteRequest,
   approveRequest,
   rejectRequest,
 };
+
