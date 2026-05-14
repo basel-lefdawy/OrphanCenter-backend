@@ -1,14 +1,9 @@
-// routes/socialAuth.routes.js
 const express = require("express");
 const { passport } = require("../config/passport");
 const authController = require("../controllers/socialAuthControllers");
 const requireAuth = require("../middleware/requireAuth");
 const { sendError } = require("../utils/apiResponse");
-
 const router = express.Router();
-
-const clientLoginUrl = () =>
-  `${(process.env.CLIENT_URL || "http://localhost:5173").replace(/\/$/, "")}/login`;
 
 const requireOAuthStrategy = (strategyName) => (req, res, next) => {
   if (!passport._strategy(strategyName)) {
@@ -18,12 +13,10 @@ const requireOAuthStrategy = (strategyName) => (req, res, next) => {
       503
     );
   }
-
   return next();
 };
 
 // ─── Facebook ─────────────────────────────────────────────────────────────────
-
 router.get(
   "/facebook",
   requireOAuthStrategy("facebook"),
@@ -36,15 +29,17 @@ router.get(
 router.get(
   "/facebook/callback",
   requireOAuthStrategy("facebook"),
-  passport.authenticate("facebook", {
-    failureRedirect: clientLoginUrl(),
-    session: false,
-  }),
-  authController.facebookCallback
+  (req, res, next) => {
+    passport.authenticate("facebook", { session: false }, (err, user) => {
+      // Whether passport succeeded or failed, hand off to the controller.
+      // req.user = null triggers the error redirect inside handleOAuthCallback.
+      req.user = user || null;
+      authController.facebookCallback(req, res, next);
+    })(req, res, next);
+  }
 );
 
 // ─── Google ───────────────────────────────────────────────────────────────────
-
 router.get(
   "/google",
   requireOAuthStrategy("google"),
@@ -57,15 +52,17 @@ router.get(
 router.get(
   "/google/callback",
   requireOAuthStrategy("google"),
-  passport.authenticate("google", {
-    failureRedirect: clientLoginUrl(),
-    session: false,
-  }),
-  authController.googleCallback
+  (req, res, next) => {
+    passport.authenticate("google", { session: false }, (err, user) => {
+      // Whether passport succeeded or failed, hand off to the controller.
+      // req.user = null triggers the error redirect inside handleOAuthCallback.
+      req.user = user || null;
+      authController.googleCallback(req, res, next);
+    })(req, res, next);
+  }
 );
 
 // ─── Current User ─────────────────────────────────────────────────────────────
-
 router.get("/me", requireAuth, authController.getCurrentUser);
 
 module.exports = router;

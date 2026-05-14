@@ -13,8 +13,11 @@ const { sendSuccess, sendError } = require("../utils/apiResponse");
  * Also save refresh token to database.
  */
 const handleOAuthCallback = async (req, res, providerName) => {
+  const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
   if (!req.user) {
-    return sendError(res, `${providerName} authentication failed`, 401);
+    return res.redirect(
+      `${clientUrl}/login?error=${encodeURIComponent(providerName + " EMAIL_ALREADY_EXISTS")}`
+    );
   }
 
   try {
@@ -32,7 +35,9 @@ const handleOAuthCallback = async (req, res, providerName) => {
     return res.redirect(redirectUrl.toString());
   } catch (err) {
     console.error(`OAuth callback error for ${providerName}:`, err);
-    return sendError(res, "Authentication failed", 500);
+    return res.redirect(
+      `${clientUrl}/login?error=${encodeURIComponent(providerName + " EMAIL_ALREADY_EXISTS")}`
+    );
   }
 };
 
