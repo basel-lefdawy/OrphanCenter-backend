@@ -28,7 +28,6 @@ router.use("/donations", donationRoutes);
 // PUBLIC
 router.use("/auth", authRoutes);
 router.use("/auth", socialAuthRoutes);
-router.use("/admin/dashboard", dashboardRoutes);
 
 router.use("/help-requests", helpRequestRoutes);
 router.use("/orphans", orphanRoutes);
@@ -37,10 +36,7 @@ router.use("/sponsors", sponsorRoutes);
 router.use("/sponsorships", sponsorShipRoutes);
 
 // ADMIN
-router.use("/admin/dashboard", dashboardRoutes);
-router.use("/admin/help-requests", helpRequestAdminRoutes);
 router.use("/admin/dashboard", requireAuth, requireAdmin, dashboardRoutes);
-
 router.use("/admin/help-requests", requireAuth, requireAdmin, helpRequestAdminRoutes);
 
 module.exports = router;
