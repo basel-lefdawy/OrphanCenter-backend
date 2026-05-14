@@ -1,6 +1,6 @@
 const stripe = require("../config/stripe");
 
-const { Donation } = require("../models/donations/donations");
+const Donation = require("../models/donations/donations");
 
 const generateDonationNumber = require(
   "../utils/generateDonationNumber"
@@ -152,15 +152,27 @@ const markDonationAsPaid = async (
 
 
 module.exports = {
+  create: createDonation,
+
   createDonation,
+
+  getAll: getAllDonations,
 
   getAllDonations,
 
+  getOne: getDonationById,
+
   getDonationById,
+
+  update: updateDonation,
 
   updateDonation,
 
+  delete: deleteDonation,
+
   deleteDonation,
+
+  markAsPaid: markDonationAsPaid,
 
   markDonationAsPaid,
 };

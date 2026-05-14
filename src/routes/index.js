@@ -24,7 +24,7 @@ router.get("/", (req, res) => {
   });
 });
 
-router.use("/donations", donationRoutes);
+router.use("/donations", donationRoutes.publicRouter);
 
 // PUBLIC
 router.use("/auth", authRoutes);
@@ -39,6 +39,7 @@ router.use("/sponsorships", sponsorShipRoutes);
 // ADMIN
 router.use("/admin/dashboard", requireAuth, requireAdmin, dashboardRoutes);
 router.use("/admin/help-requests", requireAuth, requireAdmin, helpRequestAdminRoutes);
+router.use("/admin/donations", requireAuth, requireAdmin, donationRoutes.adminRouter);
 router.use("/sponsorship-requests", sponsorshipRequestRoutes);
 
 module.exports = router;
