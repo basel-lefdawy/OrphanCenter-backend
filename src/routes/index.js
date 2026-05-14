@@ -9,7 +9,7 @@ const requireAdmin = require("../middleware/requireAdmin");
 const helpRequestRoutes = require("./helpRequestRoutes");
 const helpRequestAdminRoutes = require("./helpRequestAdminRoutes");
 const donationRoutes = require("./donationRoutes");
-
+const sponsorshipRequestRoutes = require("./sponsorshipRequestRouter");
 const sponsorRoutes = require("./SponsorRoutes");
 const sponsorShipRoutes = require("./SponsorShipRoutes");
 
@@ -37,5 +37,6 @@ router.use("/sponsorships", sponsorShipRoutes);
 router.use("/admin/dashboard", requireAuth, requireAdmin, dashboardRoutes);
 
 router.use("/admin/help-requests", requireAuth, requireAdmin, helpRequestAdminRoutes);
+router.use("/sponsorship-requests", sponsorshipRequestRoutes);
 
 module.exports = router;

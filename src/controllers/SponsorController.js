@@ -1,6 +1,6 @@
 const sponsorService = require("../services/sponsorService");
 const { getClientErrorMessage } = require("../utils/errorMessage");
-const { sponsorSchema } = require("../schemas/sponsorSchema");
+
 
 const getAllSponsors = async (req, res) => {
   try {
