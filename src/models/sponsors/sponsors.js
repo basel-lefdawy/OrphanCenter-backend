@@ -150,10 +150,14 @@ module.exports = (sequelize) => {
 
       // ─── حالة الكفيل ─────────────────────────────────────
       status: {
-        type: DataTypes.ENUM("active", "inactive"),
-        defaultValue: "active",
-        comment: "حالة الكفيل",
-      },
+          type: DataTypes.ENUM(
+            "pending",
+            "approved",
+            "rejected"
+          ),
+          defaultValue: "pending",
+          comment: "حالة طلب الكفيل",
+        },
     },
     {
       tableName: "sponsors",
