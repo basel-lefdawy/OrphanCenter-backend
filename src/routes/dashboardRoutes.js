@@ -5,6 +5,6 @@ const requireAdmin = require("../middleware/requireAdmin");
 
 const router = express.Router();
 
-router.get("/", requireAuth, requireAdmin, dashboardController.getDashboardSummary);
+router.get("/", dashboardController.getDashboardSummary);
 
 module.exports = router;
