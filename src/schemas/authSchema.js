@@ -20,7 +20,7 @@ const registerSchema = z
       .min(2, "Name must be between 2 and 50 characters")
       .max(50, "Name must be between 2 and 50 characters")
       .regex(
-        /^[a-zA-Z\s'-]+$/,
+        /^[\p{L}\s'-]+$/u,
         "Name can only contain letters, spaces, hyphens, and apostrophes"
       ),
     email: z.string().trim().min(1, "Email is required").email("Invalid email format").max(254),
