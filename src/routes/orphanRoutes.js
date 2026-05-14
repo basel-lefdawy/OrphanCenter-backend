@@ -18,3 +18,5 @@ router.put("/:id", updateOrphan);
 // Delete an orphan /api/admin/orphans/:id
 router.delete("/:id", deleteOrphan);   
 
+module.exports = router;
+
