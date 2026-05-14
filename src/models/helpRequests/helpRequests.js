@@ -12,6 +12,7 @@ const HelpRequest = sequelize.define("HelpRequest", {
   OrphanID: {
     type: DataTypes.STRING,
     allowNull: false,
+    unique: true,
   },
 
   OrphanName: DataTypes.STRING,

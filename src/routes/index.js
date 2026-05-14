@@ -7,6 +7,10 @@ const helpRequestRoutes = require("./helpRequestRoutes");
 const helpRequestAdminRoutes = require("./helpRequestAdminRoutes");
 const donationRoutes = require("./donationRoutes");
 
+// const donationRoutes = require("./donationRoutes");
+// const adminDonationRoutes = require("./adminDonationRoutes");
+
+
 const router = express.Router();
 
 router.get("/", (req, res) => {
@@ -23,7 +27,23 @@ router.use("/auth", authRoutes);
 router.use("/admin/dashboard", dashboardRoutes);
 router.use("/help-requests", helpRequestRoutes);
 
+<<<<<<< Updated upstream
 // ADMIN
 router.use("/admin/help-requests", helpRequestAdminRoutes);
+=======
+router.use("/sponsors", sponsorRoutes);
+
+router.use("/sponsorships", sponsorShipRoutes);
+
+// router.use("/donations", donationRoutes);
+
+// ADMIN
+router.use("/admin/dashboard", dashboardRoutes);
+
+router.use("/admin/help-requests",helpRequestAdminRoutes);
+
+// router.use("/admin/donations", adminDonationRoutes);
+
+>>>>>>> Stashed changes
 
 module.exports = router;

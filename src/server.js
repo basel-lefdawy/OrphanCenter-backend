@@ -6,7 +6,14 @@ const { sequelize } = require("./config/db");
 require("./models/orphans/orphans");
 require("./models/guardian/guardian");
 require("./models/helpRequests/helpRequests");
+<<<<<<< Updated upstream
 require("./models/donations/donations");
+=======
+require("./models/sponsors/sponsors");
+require("./models/sponsorShip/sponsorShip");
+// require("./models/donations/donations");
+
+>>>>>>> Stashed changes
 
 const PORT = process.env.PORT || 5000;
 

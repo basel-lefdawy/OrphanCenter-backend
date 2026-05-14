@@ -1,11 +1,22 @@
 const { z } = require("zod");
 
+const palestinianIdRegex = /^\d{9}$/;
+const phoneRegex = /^\d{10}$/;
+const homePhoneRegex = /^\d{7}$/;
+
+// تنظيف أي قيمة فاضية من التاريخ
+const optionalDate = z.preprocess(
+  (val) => (val === "" || val === null ? undefined : val),
+  z.coerce.date().optional()
+);
+
 const helpRequestSchema = z.object({
-  OrphanID: z.string().min(1),
-  OrphanName: z.string().min(1),
-  OrphanFatherName: z.string().min(1),
-  OrphanGrandfatherName: z.string().min(1),
-  OrphanFamilyName: z.string().min(1),
+  OrphanID: z.string().regex(palestinianIdRegex, "رقم هوية اليتيم غير صالح"),
+
+  OrphanName: z.string().min(2),
+  OrphanFatherName: z.string().min(2),
+  OrphanGrandfatherName: z.string().min(2),
+  OrphanFamilyName: z.string().min(2),
 
   OrphanBirthDate: z.coerce.date(),
 
@@ -18,43 +29,93 @@ const helpRequestSchema = z.object({
     "SocialCase",
   ]),
 
-  GuardianID: z.string().min(1),
-  GuardianName: z.string().min(1),
-  GuardianFatherName: z.string().min(1),
-  GuardianGrandfatherName: z.string().min(1),
-  GuardianFamilyName: z.string().min(1),
+  GuardianID: z.string().regex(palestinianIdRegex, "رقم هوية الوصي غير صالح"),
 
-  Relation: z.string().min(1),
+  GuardianName: z.string().min(2),
+  GuardianFatherName: z.string().min(2),
+  GuardianGrandfatherName: z.string().min(2),
+  GuardianFamilyName: z.string().min(2),
+
+  Relation: z.string().min(2),
 
   country: z.string().min(1),
   city: z.string().min(1),
+  street: z.string().min(1, "الشارع مطلوب"),
 
-  phoneNumber: z.string().regex(/^[0-9]{10,15}$/),
+  phoneNumber: z.string().regex(phoneRegex, "رقم الجوال يجب أن يكون 10 أرقام"),
+
+  homePhone: z.string().regex(homePhoneRegex).optional().or(z.literal("")),
+
   email: z.string().email(),
 
   paymentMethod: z.enum(["Cash", "BankAccount"]),
 
-  FamilyMember: z.number().min(1),
-  MonthlyIncome: z.number().min(0),
+  FamilyMember: z.coerce.number().min(1),
+  MonthlyIncome: z.coerce.number().min(0),
 
-  IBAN: z.string().regex(/^[A-Z]{2}[0-9A-Z]{13,32}$/).optional(),
-  bankAccount: z.string().regex(/^\d{6,30}$/).optional(),
+  IBAN: z.string().optional(),
+  bankAccount: z.string().optional(),
+
+  FatherDeathDate: optionalDate,
+  MotherDeathDate: optionalDate,
+
+  DeceasedPerson: z.enum(["Father", "Mother", "Both"]).optional(),
 })
+<<<<<<< Updated upstream
 .refine((data) => {
   if (data.paymentMethod === "BankAccount") {
     return !!data.IBAN && !!data.bankAccount;
+=======
+.superRefine((data, ctx) => {
+
+  const birth = new Date(data.OrphanBirthDate);
+  const today = new Date();
+
+  const father = data.FatherDeathDate ? new Date(data.FatherDeathDate) : null;
+  const mother = data.MotherDeathDate ? new Date(data.MotherDeathDate) : null;
+
+  const isFather = data.DeceasedPerson === "Father" || data.DeceasedPerson === "Both";
+  const isMother = data.DeceasedPerson === "Mother" || data.DeceasedPerson === "Both";
+
+  // FATHER 
+  if (isFather && father) {
+
+    if (father > today) {
+      ctx.addIssue({
+        path: ["FatherDeathDate"],
+        message: "تاريخ وفاة الأب لا يمكن أن يكون في المستقبل",
+      });
+    }
+
+    const conception = new Date(birth);
+    conception.setMonth(conception.getMonth() - 9);
+
+    if (father < conception) {
+      ctx.addIssue({
+        path: ["FatherDeathDate"],
+        message: "تاريخ وفاة الأب غير منطقي مع فترة الحمل",
+      });
+    }
+>>>>>>> Stashed changes
   }
-  return true;
-}, {
-  message: "IBAN and bankAccount are required when paymentMethod is BankAccount",
-})
-.refine((data) => {
-  if (data.paymentMethod === "Cash") {
-    return true;
+
+  //  MOTHER 
+  if (isMother && mother) {
+
+    if (mother > today) {
+      ctx.addIssue({
+        path: ["MotherDeathDate"],
+        message: "تاريخ وفاة الأم لا يمكن أن يكون في المستقبل",
+      });
+    }
+
+    if (mother < birth) {
+      ctx.addIssue({
+        path: ["MotherDeathDate"],
+        message: "تاريخ وفاة الأم غير منطقي",
+      });
+    }
   }
-  return true;
 });
 
-module.exports = {
-  helpRequestSchema,
-};
+module.exports = { helpRequestSchema };
