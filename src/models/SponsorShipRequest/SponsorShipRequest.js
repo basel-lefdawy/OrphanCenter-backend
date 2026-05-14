@@ -1,22 +1,21 @@
 const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-  const Sponsor = sequelize.define(
-    "Sponsor",
+  const SponsorshipRequest = sequelize.define(
+    "SponsorshipRequest",
     {
       // ─── Primary Key ────────────────────────────────────
       id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
-        comment: "sponsor_id — PK",
+        comment: "sponsorship_request_id — PK",
       },
 
       // ─── معلومات الكفيل ─────────────────────────────────
       identityNumber: {
         type: DataTypes.STRING(20),
         allowNull: false,
-        unique: true,
         comment: "رقم الهوية",
       },
       firstName: {
@@ -82,7 +81,6 @@ module.exports = (sequelize) => {
       email: {
         type: DataTypes.STRING(100),
         allowNull: false,
-        unique: true,
         comment: "البريد الإلكتروني",
       },
 
@@ -148,33 +146,81 @@ module.exports = (sequelize) => {
         comment: "رقم الجوال - المفوض",
       },
 
-      // ─── حالة الكفيل ─────────────────────────────────────
+      // ─── تفاصيل الكفالة ──────────────────────────────────
+      orphanId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        comment: "FK → orphans.id",
+      },
+      monthlySAmount: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        comment: "قيمة الكفالة الشهرية",
+      },
+      startingSDate: {
+        type: DataTypes.DATEONLY,
+        allowNull: false,
+        comment: "تاريخ بدء الكفالة",
+      },
+      endSDate: {
+        type: DataTypes.DATEONLY,
+        allowNull: true,
+        comment: "تاريخ انتهاء الكفالة",
+      },
+      paymentMethod: {
+        type: DataTypes.ENUM("bank_transfer", "cash", "check", "electronic"),
+        allowNull: false,
+        comment: "طريقة الصرف",
+      },
+      bankName: {
+        type: DataTypes.STRING(100),
+        allowNull: true,
+        comment: "اسم البنك",
+      },
+      branchNumber: {
+        type: DataTypes.STRING(50),
+        allowNull: true,
+        comment: "رقم الفرع",
+      },
+      accountNumber: {
+        type: DataTypes.STRING(50),
+        allowNull: true,
+        comment: "رقم الحساب",
+      },
+      accountHolderName: {
+        type: DataTypes.STRING(100),
+        allowNull: true,
+        comment: "اسم صاحب الحساب",
+      },
+      iban: {
+        type: DataTypes.STRING(34),
+        allowNull: true,
+        comment: "رقم الآيبان",
+      },
+
+      // ─── حالة الطلب ──────────────────────────────────────
       status: {
-          type: DataTypes.ENUM(
-            "pending",
-            "approved",
-            "rejected"
-          ),
-          defaultValue: "pending",
-          comment: "حالة طلب الكفيل",
-        },
+        type: DataTypes.ENUM("pending", "approved", "rejected"),
+        allowNull: false,
+        defaultValue: "pending",
+        comment: "حالة طلب الكفالة",
+      },
     },
     {
-      tableName: "sponsors",
+      tableName: "sponsorship_requests",
       timestamps: true,
       paranoid: true,
       underscored: true,
     }
   );
 
-  // ─── العلاقات حسب الـ ERD ────────────────────────────
-  Sponsor.associate = (models) => {
-    // Sponsor M ── M Orphan عبر Sponsorship
-    Sponsor.hasMany(models.Sponsorship, {
-      foreignKey: "sponsorId",
-      as: "sponsorships",
+  // ─── العلاقات ─────────────────────────────────────────
+  SponsorshipRequest.associate = (models) => {
+    SponsorshipRequest.belongsTo(models.Orphan, {
+      foreignKey: "orphanId",
+      as: "orphan",
     });
   };
 
-  return Sponsor;
+  return SponsorshipRequest;
 };

@@ -1,40 +1,44 @@
 const express = require("express");
 
-const router = express.Router();
+const publicRouter = express.Router();
+const adminRouter = express.Router();
 
 const donationController = require(
   "../controllers/donationController"
 );
 
-router.post(
+publicRouter.post(
   "/",
   donationController.create
 );
 
-router.get(
-  "/admin/donations",
-  donationController.getAll
-);
-
-router.get(
-  "/admin/donations/:id",
-  donationController.getOne
-);
-
-router.patch(
-  "/admin/donations/:id",
-  donationController.update
-);
-
-router.delete(
-  "/admin/donations/:id",
-  donationController.delete
-);
-
-router.post(
+publicRouter.post(
   "/webhook",
   express.json(),
   donationController.webhook
 );
 
-module.exports = router;
+adminRouter.get(
+  "/",
+  donationController.getAll
+);
+
+adminRouter.get(
+  "/:id",
+  donationController.getOne
+);
+
+adminRouter.patch(
+  "/:id",
+  donationController.update
+);
+
+adminRouter.delete(
+  "/:id",
+  donationController.delete
+);
+
+module.exports = {
+  publicRouter,
+  adminRouter,
+};

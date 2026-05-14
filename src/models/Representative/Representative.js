@@ -86,78 +86,12 @@ module.exports = (sequelize) => {
         comment: "البريد الإلكتروني",
       },
 
-      // ─── معلومات المفوّض (inline) ────────────────────────
-      delegateIdentityNumber: {
-        type: DataTypes.STRING(20),
-        allowNull: true,
-        comment: "رقم الهوية - المفوض",
-      },
-      delegateFirstName: {
-        type: DataTypes.STRING(50),
-        allowNull: true,
-        comment: "الاسم - المفوض",
-      },
-      delegateFatherName: {
-        type: DataTypes.STRING(50),
-        allowNull: true,
-        comment: "الأب - المفوض",
-      },
-      delegateGrandfatherName: {
-        type: DataTypes.STRING(50),
-        allowNull: true,
-        comment: "الجد - المفوض",
-      },
-      delegateFamilyName: {
-        type: DataTypes.STRING(50),
-        allowNull: true,
-        comment: "العائلة - المفوض",
-      },
-      delegateJobType: {
-        type: DataTypes.STRING(100),
-        allowNull: true,
-        comment: "نوع العمل - المفوض",
-      },
-      delegateGender: {
-        type: DataTypes.ENUM("male", "female"),
-        allowNull: true,
-        comment: "الجنس - المفوض",
-      },
-      delegateRelationship: {
-        type: DataTypes.STRING(50),
-        allowNull: true,
-        comment: "صلة القرابة مع الكفيل",
-      },
-      delegateCountry: {
-        type: DataTypes.STRING(60),
-        allowNull: true,
-        comment: "الدولة - المفوض",
-      },
-      delegateCity: {
-        type: DataTypes.STRING(60),
-        allowNull: true,
-        comment: "المدينة - المفوض",
-      },
-      delegateStreet: {
-        type: DataTypes.STRING(100),
-        allowNull: true,
-        comment: "الشارع - المفوض",
-      },
-      delegateMobile: {
-        type: DataTypes.STRING(20),
-        allowNull: true,
-        comment: "رقم الجوال - المفوض",
-      },
-
       // ─── حالة الكفيل ─────────────────────────────────────
       status: {
-          type: DataTypes.ENUM(
-            "pending",
-            "approved",
-            "rejected"
-          ),
-          defaultValue: "pending",
-          comment: "حالة طلب الكفيل",
-        },
+        type: DataTypes.ENUM("pending", "approved", "rejected"),
+        defaultValue: "pending",
+        comment: "حالة طلب الكفيل",
+      },
     },
     {
       tableName: "sponsors",
@@ -167,12 +101,16 @@ module.exports = (sequelize) => {
     }
   );
 
-  // ─── العلاقات حسب الـ ERD ────────────────────────────
+  // ─── العلاقات ─────────────────────────────────────────
   Sponsor.associate = (models) => {
-    // Sponsor M ── M Orphan عبر Sponsorship
     Sponsor.hasMany(models.Sponsorship, {
       foreignKey: "sponsorId",
       as: "sponsorships",
+    });
+
+    Sponsor.hasOne(models.Representative, {
+      foreignKey: "sponsorId",
+      as: "representative",
     });
   };
 

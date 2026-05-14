@@ -2,28 +2,24 @@ const { z } = require("zod");
 
 const phoneRegex = /^[0-9]{10,15}$/;
 
-const sponsorSchema = z.object({
+const sponsorshipRequestSchema = z.object({
+  // ─── معلومات الكفيل ─────────────────────────────────
   identityNumber: z.string().min(1).max(20),
   firstName: z.string().min(1).max(50),
   fatherName: z.string().min(1).max(50),
   grandfatherName: z.string().min(1).max(50),
   familyName: z.string().min(1).max(50),
-
   dateOfBirth: z.coerce.date(),
-
   gender: z.enum(["male", "female"]),
-
   jobType: z.string().min(1).max(100),
-
   country: z.string().min(1).max(60),
   city: z.string().min(1).max(60),
   street: z.string().max(100).optional().nullable(),
-
   mobile: z.string().regex(phoneRegex).max(20),
   phone: z.string().max(20).optional().nullable(),
-
   email: z.string().email().max(100),
 
+  // ─── معلومات المفوض ──────────────────────────────────
   delegateIdentityNumber: z.string().max(20).optional().nullable(),
   delegateFirstName: z.string().max(50).optional().nullable(),
   delegateFatherName: z.string().max(50).optional().nullable(),
@@ -35,11 +31,22 @@ const sponsorSchema = z.object({
   delegateCountry: z.string().max(60).optional().nullable(),
   delegateCity: z.string().max(60).optional().nullable(),
   delegateStreet: z.string().max(100).optional().nullable(),
-  delegateMobile: z.string().max(20).optional().nullable(),
+  delegateMobile: z.string().regex(phoneRegex).max(20).optional().nullable(),
 
-  status: z.enum(["active", "inactive"]).optional(),
+  // ─── تفاصيل الكفالة ──────────────────────────────────
+  orphanId: z.number().int().positive(),
+  monthlySAmount: z.number().positive(),
+  startingSDate: z.coerce.date(),
+  endSDate: z.coerce.date().optional().nullable(),
+  paymentMethod: z.enum(["bank_transfer", "cash", "check", "electronic"]),
+  bankName: z.string().max(100).optional().nullable(),
+  branchNumber: z.string().max(50).optional().nullable(),
+  accountNumber: z.string().max(50).optional().nullable(),
+  accountHolderName: z.string().max(100).optional().nullable(),
+  iban: z.string().max(34).optional().nullable(),
+
+  // ─── حالة الطلب ──────────────────────────────────────
+  status: z.enum(["pending", "approved", "rejected"]).optional(),
 });
 
-module.exports = {
-  sponsorSchema,
-};
+module.exports = { sponsorshipRequestSchema };
