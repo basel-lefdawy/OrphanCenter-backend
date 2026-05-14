@@ -20,6 +20,18 @@ const validate = (schema) => {
 
       return res.status(400).json({
         message: "Invalid Request",
+      const issues = err.issues || err.errors || [];
+      const errors = issues.map((issue) => ({
+        field: Array.isArray(issue.path) ? issue.path.join(".") : issue.path,
+        message: issue.message,
+      }));
+      const message =
+        errors[0]?.message || "يرجى التحقق من البيانات المدخلة والمحاولة مرة أخرى.";
+
+      return res.status(400).json({
+        success: false,
+        message,
+        errors,
       });
     }
   };
