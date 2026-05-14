@@ -1,6 +1,8 @@
 const HelpRequestService = require("../services/helpRequestService");
 const { helpRequestSchema } = require("../schemas/helpRequestSchema");
 
+const helpRequestUpdateSchema = helpRequestSchema.partial();
+
 // FORMAT ZOD ERRORS
 const formatValidationErrors = (errors) => {
   return errors.map((e) => ({
@@ -111,7 +113,7 @@ const updateRequest = async (req, res) => {
   try {
 
     const validatedData =
-      helpRequestSchema.parse(req.body);
+      helpRequestUpdateSchema.parse(req.body);
 
     const data =
       await HelpRequestService.update(
