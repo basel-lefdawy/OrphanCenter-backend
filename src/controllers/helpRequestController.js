@@ -1,11 +1,14 @@
 const HelpRequestService = require("../services/helpRequestService");
 const { helpRequestSchema } = require("../schemas/helpRequestSchema");
+const { z } = require("zod");
 
-const helpRequestUpdateSchema = helpRequestSchema.partial();
+const helpRequestUpdateSchema = z.object({
+  status: z.enum(["Pending", "Approved", "Rejected"]).optional(),
+});
 
 // FORMAT ZOD ERRORS
 const formatValidationErrors = (errors) => {
-  return errors.map((e) => ({
+  return (errors || []).map((e) => ({
     field: e.path.join("."),
     message: e.message,
   }));
@@ -33,10 +36,11 @@ const createRequest = async (req, res) => {
 
     // ZOD VALIDATION
     if (err.name === "ZodError") {
+      const errors = err.issues || err.errors || [];
       return res.status(400).json({
         success: false,
         message: "Validation Error",
-        errors: formatValidationErrors(err.errors),
+        errors: formatValidationErrors(errors),
       });
     }
 
@@ -134,11 +138,12 @@ const updateRequest = async (req, res) => {
 
     // ZOD VALIDATION
     if (err.name === "ZodError") {
+      const errors = err.issues || err.errors || [];
 
       return res.status(400).json({
         message: "Validation Error",
         errors: formatValidationErrors(
-          err.errors
+          errors
         ),
       });
     }
