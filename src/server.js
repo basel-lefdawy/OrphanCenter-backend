@@ -13,6 +13,7 @@ require("./models/sponsorShip/sponsorShip");
 require("./models/auth/user");
 require("./models/auth/RefreshToken");
 
+require("./models");
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
