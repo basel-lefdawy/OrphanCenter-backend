@@ -25,7 +25,12 @@ app.get("/health", (req, res) => {
 // API routes
 app.use("/api", routes);
 
-// 404 handler
+app.use((err, req, res, next) => {
+  const statusCode = err.statusCode && Number.isInteger(err.statusCode) ? err.statusCode : 500;
+  const message = err.message || "Something went wrong";
+  return sendError(res, message, statusCode);
+});
+
 app.use((req, res) => {
   return sendError(res, "Route not found", 404);
 });
