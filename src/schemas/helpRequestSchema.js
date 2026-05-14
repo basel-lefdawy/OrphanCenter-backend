@@ -61,11 +61,12 @@ const helpRequestSchema = z.object({
 
   DeceasedPerson: z.enum(["Father", "Mother", "Both"]).optional(),
 })
-<<<<<<< Updated upstream
 .refine((data) => {
   if (data.paymentMethod === "BankAccount") {
     return !!data.IBAN && !!data.bankAccount;
-=======
+  }
+  return true;
+})
 .superRefine((data, ctx) => {
 
   const birth = new Date(data.OrphanBirthDate);
@@ -96,7 +97,6 @@ const helpRequestSchema = z.object({
         message: "تاريخ وفاة الأب غير منطقي مع فترة الحمل",
       });
     }
->>>>>>> Stashed changes
   }
 
   //  MOTHER 
