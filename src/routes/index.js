@@ -36,9 +36,12 @@ router.use("/orphans", orphanRoutes);
 router.use("/sponsors", sponsorRoutes);
 router.use("/sponsorships", sponsorShipRoutes);
 
+router.use("/sponsorship-requests", sponsorshipRequestRoutes);
+
 // ADMIN
 router.use("/admin/dashboard", requireAuth, requireAdmin, dashboardRoutes);
 router.use("/admin/help-requests", requireAuth, requireAdmin, helpRequestAdminRoutes);
-router.use("/sponsorship-requests", sponsorshipRequestRoutes);
+router.use("/admin/sponsorship-requests", requireAuth, requireAdmin, sponsorshipRequestRoutes);
+
 
 module.exports = router;
