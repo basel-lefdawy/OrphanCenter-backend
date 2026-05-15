@@ -1,5 +1,5 @@
-const { Op } = require("sequelize");
-const { Orphan, Sponsor } = require("../models");
+const { fn, col } = require("sequelize");
+const { Orphan, Sponsor, Sponsorship } = require("../models");
 const Donation = require("../models/donations/donations");
 const HelpRequest = require("../models/helpRequests/helpRequests");
 
@@ -37,27 +37,17 @@ async function safeFindAll(model, modelName) {
 }
 
 async function safeSponsoredOrphanCount() {
-  if (!Orphan || typeof Orphan.count !== "function") {
+  if (!Sponsorship || typeof Sponsorship.count !== "function") {
     return {
       count: 0,
-      warning: "Orphan model is not implemented yet",
-    };
-  }
-
-  if (!Orphan.rawAttributes || !Orphan.rawAttributes.sponsorId) {
-    return {
-      count: 0,
-      warning: "Orphan model does not define sponsorId; sponsored count defaults to 0",
+      warning: "Sponsorship model is not implemented yet; sponsored count defaults to 0",
     };
   }
 
   try {
-    const count = await Orphan.count({
-      where: {
-        sponsorId: {
-          [Op.ne]: null,
-        },
-      },
+    const count = await Sponsorship.count({
+      distinct: true,
+      col: "orphanId",
     });
 
     return { count, warning: null };
