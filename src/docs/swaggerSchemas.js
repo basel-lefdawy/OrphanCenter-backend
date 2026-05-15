@@ -40,6 +40,81 @@ const schemas = {
       role: { type: "string", example: "user" },
     },
   },
+  RegisterBody: {
+    type: "object",
+    required: ["name", "email", "password", "confirmPassword"],
+    properties: {
+      name: { type: "string", minLength: 2, maxLength: 50, example: "Demo Admin" },
+      email: { type: "string", format: "email", example: "admin@example.com" },
+      password: { type: "string", minLength: 8, maxLength: 128, example: "Password1!" },
+      confirmPassword: { type: "string", example: "Password1!" },
+    },
+  },
+  LoginBody: {
+    type: "object",
+    required: ["email", "password"],
+    properties: {
+      email: { type: "string", format: "email", example: "admin@example.com" },
+      password: { type: "string", example: "Password1!" },
+    },
+  },
+  RefreshTokenBody: {
+    type: "object",
+    required: ["refreshToken"],
+    properties: {
+      refreshToken: { type: "string", example: "eyJhbGciOi..." },
+    },
+  },
+  VerifyEmailBody: {
+    type: "object",
+    required: ["email", "token"],
+    properties: {
+      email: { type: "string", format: "email", example: "admin@example.com" },
+      token: { type: "string", example: "email-verification-token" },
+    },
+  },
+  ForgotPasswordBody: {
+    type: "object",
+    required: ["email"],
+    properties: {
+      email: { type: "string", format: "email", example: "admin@example.com" },
+    },
+  },
+  ResetPasswordBody: {
+    type: "object",
+    required: ["email", "token", "password", "confirmPassword"],
+    properties: {
+      email: { type: "string", format: "email", example: "admin@example.com" },
+      token: { type: "string", example: "reset-token" },
+      password: { type: "string", minLength: 8, maxLength: 128, example: "NewPassword1!" },
+      confirmPassword: { type: "string", example: "NewPassword1!" },
+    },
+  },
+  AuthTokens: {
+    type: "object",
+    properties: {
+      accessToken: { type: "string", example: "eyJhbGciOi..." },
+      refreshToken: { type: "string", example: "eyJhbGciOi..." },
+    },
+  },
+  AuthResponse: {
+    type: "object",
+    required: ["success", "message", "data"],
+    properties: {
+      success: { type: "boolean", example: true },
+      message: { type: "string", example: "Logged in successfully" },
+      data: {
+        type: "object",
+        properties: {
+          user: { $ref: "#/components/schemas/AuthUser" },
+          accessToken: { type: "string", example: "eyJhbGciOi..." },
+          refreshToken: { type: "string", example: "eyJhbGciOi..." },
+          message: { type: "string", example: "Verification email sent. Please check your inbox to complete registration." },
+        },
+        additionalProperties: true,
+      },
+    },
+  },
   CurrentUserResponse: {
     type: "object",
     required: ["success", "message", "data"],
@@ -156,13 +231,9 @@ const schemas = {
       warnings: {
         type: "array",
         items: { type: "string" },
-        example: [
-          "Sponsor model is not implemented yet",
-          "Donation model is not implemented yet",
-          "Orphan model does not define sponsorId; sponsored count defaults to 0",
-        ],
+        example: [],
         description:
-          "Temporary-safe warnings returned when optional dashboard data sources are missing or unavailable.",
+          "Warnings returned only if a dashboard data source cannot be queried.",
       },
     },
   },
@@ -219,11 +290,7 @@ const schemas = {
           orphans: [],
           donations: [],
         },
-        warnings: [
-          "Sponsor model is not implemented yet",
-          "Donation model is not implemented yet",
-          "Orphan model does not define sponsorId; sponsored count defaults to 0",
-        ],
+        warnings: [],
       },
     },
   },
@@ -286,6 +353,7 @@ const schemas = {
       "Relation",
       "country",
       "city",
+      "street",
       "phoneNumber",
       "email",
       "paymentMethod",
@@ -312,7 +380,9 @@ const schemas = {
       Relation: { type: "string" },
       country: { type: "string" },
       city: { type: "string" },
-      phoneNumber: { type: "string", pattern: "^[0-9]{10,15}$" },
+      street: { type: "string" },
+      phoneNumber: { type: "string", pattern: "^\\d{10}$" },
+      homePhone: { type: "string", pattern: "^\\d{7}$" },
       email: { type: "string", format: "email" },
       paymentMethod: { type: "string", enum: ["Cash", "BankAccount"] },
       FamilyMember: { type: "integer", minimum: 1 },
@@ -324,9 +394,11 @@ const schemas = {
       },
       bankAccount: {
         type: "string",
-        pattern: "^\\d{6,30}$",
         description: "Required when paymentMethod is BankAccount.",
       },
+      FatherDeathDate: { type: "string", format: "date" },
+      MotherDeathDate: { type: "string", format: "date" },
+      DeceasedPerson: { type: "string", enum: ["Father", "Mother", "Both"] },
     },
   },
 
@@ -345,10 +417,20 @@ const schemas = {
 
   HelpRequestSuccessOne: {
     type: "object",
+    required: ["success", "message", "data"],
     properties: {
-      id: { type: "integer", example: 1 },
-      OrphanID: { type: "string", example: "OR-1001" },
-      status: { type: "string", example: "Pending" },
+      success: { type: "boolean", example: true },
+      message: { type: "string", example: "طھظ… ط¥ط±ط³ط§ظ„ ط·ظ„ط¨ ط§ظ„ظ…ط³ط§ط¹ط¯ط© ط¨ظ†ط¬ط§ط­" },
+      data: { $ref: "#/components/schemas/HelpRequest" },
+    },
+  },
+  HelpRequestApprovalResponse: {
+    type: "object",
+    description: "Raw approval result returned by the current help request controller.",
+    properties: {
+      req: { $ref: "#/components/schemas/HelpRequest" },
+      guardian: { type: "object", additionalProperties: true },
+      orphan: { type: "object", additionalProperties: true },
     },
     additionalProperties: true,
   },
@@ -428,6 +510,7 @@ const schemas = {
       OrphanBirthDate: { type: "string", format: "date", example: "2018-05-10" },
       gender: { type: "string", example: "Male" },
       GuaranteeType: { type: "string", example: "Educational" },
+      description: { type: "string", nullable: true, example: "Needs school and living support" },
       GuardianID: { type: "string", example: "G-1001" },
       RequestID: { type: "integer", nullable: true, example: 1 },
     },
@@ -436,6 +519,28 @@ const schemas = {
   OrphanList: {
     type: "array",
     items: { $ref: "#/components/schemas/Orphan" },
+  },
+  OrphanCreateBody: {
+    type: "object",
+    required: ["OrphanID", "GuardianID"],
+    properties: {
+      OrphanID: { type: "string", example: "123456789" },
+      OrphanName: { type: "string", example: "Ahmed" },
+      OrphanFatherName: { type: "string", example: "Ali" },
+      OrphanGrandfatherName: { type: "string", example: "Hassan" },
+      OrphanFamilyName: { type: "string", example: "Saleh" },
+      OrphanBirthDate: { type: "string", format: "date", example: "2018-05-10" },
+      gender: { type: "string", example: "Male" },
+      GuaranteeType: { type: "string", example: "Educational" },
+      description: { type: "string", nullable: true },
+      GuardianID: { type: "string", example: "987654321" },
+      RequestID: { type: "integer", nullable: true },
+    },
+  },
+  OrphanUpdateBody: {
+    type: "object",
+    description: "Partial orphan fields accepted by the current admin update route.",
+    additionalProperties: true,
   },
 
   CrudMessageResponse: {
@@ -649,39 +754,134 @@ const schemas = {
       },
     },
   },
+  SponsorshipRequest: {
+    type: "object",
+    description: "Sponsorship request record returned by the sponsorship request API.",
+    additionalProperties: true,
+    properties: {
+      id: { type: "integer", example: 1 },
+      userId: { type: "integer", example: 1 },
+      identityNumber: { type: "string", example: "123456789" },
+      firstName: { type: "string", example: "Hanan" },
+      familyName: { type: "string", example: "Saber" },
+      orphanId: { type: "integer", example: 1 },
+      monthlySAmount: { type: "number", example: 100 },
+      paymentMethod: { type: "string", enum: ["bank_transfer", "cash", "check", "electronic"] },
+      status: { type: "string", enum: ["pending", "approved", "rejected"], example: "pending" },
+      createdAt: { type: "string", format: "date-time", nullable: true },
+      updatedAt: { type: "string", format: "date-time", nullable: true },
+    },
+  },
+  SponsorshipRequestBody: {
+    type: "object",
+    description:
+      "Create body combines sponsor identity fields with sponsorship fields. Requires authentication; userId is taken from the JWT, not from the request body.",
+    required: [
+      "identityNumber",
+      "firstName",
+      "fatherName",
+      "grandfatherName",
+      "familyName",
+      "dateOfBirth",
+      "gender",
+      "jobType",
+      "country",
+      "city",
+      "mobile",
+      "email",
+      "orphanId",
+      "monthlySAmount",
+      "startingSDate",
+      "paymentMethod",
+    ],
+    properties: {
+      identityNumber: { type: "string", example: "123456789" },
+      firstName: { type: "string", example: "Hanan" },
+      fatherName: { type: "string", example: "Ali" },
+      grandfatherName: { type: "string", example: "Mahmoud" },
+      familyName: { type: "string", example: "Saber" },
+      dateOfBirth: { type: "string", format: "date", example: "1985-01-15" },
+      gender: { type: "string", enum: ["male", "female"] },
+      jobType: { type: "string", example: "Teacher" },
+      country: { type: "string", example: "Palestine" },
+      city: { type: "string", example: "Gaza" },
+      street: { type: "string", nullable: true },
+      mobile: { type: "string", example: "0591234567" },
+      phone: { type: "string", nullable: true },
+      email: { type: "string", format: "email", example: "sponsor@example.com" },
+      orphanId: { type: "integer", example: 1 },
+      monthlySAmount: { type: "number", example: 100 },
+      startingSDate: { type: "string", format: "date", example: "2026-05-16" },
+      endSDate: { type: "string", format: "date", nullable: true },
+      paymentMethod: { type: "string", enum: ["bank_transfer", "cash", "check", "electronic"] },
+      bankName: { type: "string", nullable: true },
+      branchNumber: { type: "string", nullable: true },
+      accountNumber: { type: "string", nullable: true },
+      accountHolderName: { type: "string", nullable: true },
+      iban: { type: "string", nullable: true },
+      status: { type: "string", enum: ["pending", "approved", "rejected"] },
+    },
+  },
+  SponsorshipRequestUpdateBody: {
+    type: "object",
+    description: "Partial sponsorship request update body accepted by the admin update route.",
+    additionalProperties: true,
+  },
+  SponsorshipRequestSuccessOne: {
+    type: "object",
+    required: ["success", "message", "data"],
+    properties: {
+      success: { type: "boolean", example: true },
+      message: { type: "string", example: "Success" },
+      data: { $ref: "#/components/schemas/SponsorshipRequest" },
+    },
+  },
+  SponsorshipRequestSuccessList: {
+    type: "object",
+    required: ["success", "message", "data"],
+    properties: {
+      success: { type: "boolean", example: true },
+      message: { type: "string", example: "Success" },
+      data: { type: "array", items: { $ref: "#/components/schemas/SponsorshipRequest" } },
+    },
+  },
 
   SponsorSuccessList: {
     type: "object",
-    required: ["success", "data"],
+    required: ["success", "message", "data"],
     properties: {
       success: { type: "boolean", example: true },
+      message: { type: "string", example: "Success" },
       data: { type: "array", items: { $ref: "#/components/schemas/Sponsor" } },
     },
   },
 
   SponsorSuccessOne: {
     type: "object",
-    required: ["success", "data"],
+    required: ["success", "message", "data"],
     properties: {
       success: { type: "boolean", example: true },
+      message: { type: "string", example: "Success" },
       data: { $ref: "#/components/schemas/Sponsor" },
     },
   },
 
   SponsorshipSuccessList: {
     type: "object",
-    required: ["success", "data"],
+    required: ["success", "message", "data"],
     properties: {
       success: { type: "boolean", example: true },
+      message: { type: "string", example: "Success" },
       data: { type: "array", items: { $ref: "#/components/schemas/Sponsorship" } },
     },
   },
 
   SponsorshipSuccessOne: {
     type: "object",
-    required: ["success", "data"],
+    required: ["success", "message", "data"],
     properties: {
       success: { type: "boolean", example: true },
+      message: { type: "string", example: "Success" },
       data: { $ref: "#/components/schemas/Sponsorship" },
     },
   },

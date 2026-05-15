@@ -41,7 +41,7 @@ router.use("/sponsorship-requests", sponsorshipRequestRoutes);
 
 // ADMIN
 router.use("/admin/dashboard", requireAuth, requireAdmin, dashboardRoutes);
-router.use("/admin/help-requests", helpRequestAdminRoutes);
+router.use("/admin/help-requests", requireAuth, requireAdmin, helpRequestAdminRoutes);
 router.use("/admin/sponsorship-requests", requireAuth, requireAdmin, sponsorshipRequestAdminRoutes);
 router.use("/admin/donations", requireAuth, requireAdmin, donationRoutes.adminRouter);
 
