@@ -46,4 +46,7 @@ router.use("/admin/sponsorship-requests", requireAuth, requireAdmin, sponsorship
 router.use("/admin/donations", requireAuth, requireAdmin, donationRoutes.adminRouter);
 router.use("/sponsorship-requests", sponsorshipRequestRoutes);
 
+
+router.use("/admin/orphans", requireAuth, requireAdmin, orphanAdminRoutes);
+
 module.exports = router;

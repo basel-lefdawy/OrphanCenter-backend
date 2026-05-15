@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const app = require("./app");
-const { sequelize } = require("./config/db");
+const { connectDB } = require("./config/db");
 const seedDevAdmin = require("./utils/seedDevAdmin");
 
 require("./models/orphans/orphans");
@@ -18,11 +18,8 @@ const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
-    await sequelize.authenticate();
-    console.log("✅ Database connected");
-
-    await sequelize.sync();
-    console.log("✅ Database synced");
+    await connectDB();
+    console.log("✅ Database connected and synced");
 
     if (process.env.NODE_ENV !== "production") {
       await seedDevAdmin();
