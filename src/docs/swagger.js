@@ -33,6 +33,7 @@ const swaggerDefinition = {
     { name: "Admin Dashboard", description: "Admin dashboard summary" },
     { name: "Help Requests", description: "Public help request submission and lookup" },
     { name: "Admin Help Requests", description: "Admin help request review workflow" },
+    { name: "Admin Donations", description: "Admin donation review workflow" },
     { name: "Sponsors", description: "Sponsors (الكفّال) CRUD and nested sponsorships" },
     { name: "Sponsorships", description: "Sponsorships (الكفالات) CRUD and status" },
   ],
@@ -162,7 +163,7 @@ const swaggerDefinition = {
         tags: ["Admin Dashboard"],
         summary: "Get admin dashboard summary",
         description:
-          "Returns the current Admin Dashboard summary response. The response data includes counts, helpRequestStatuses, totalDonations, sponsorshipRate, recent.orphans, recent.donations, and warnings. This endpoint is temporary-safe: if optional Sponsor or Donation models are not implemented yet, their values fall back to empty data and warnings explain the fallback. This route is protected by JWT authentication and admin authorization.",
+          "Returns the current Admin Dashboard summary response. The response data includes counts, helpRequestStatuses, totalDonations, sponsorshipRate, recent.orphans, recent.donations, and warnings. This endpoint is temporary-safe: if a dashboard data source cannot be queried, its values fall back to empty data and warnings explain the fallback. This route is protected by JWT authentication and admin authorization.",
         security: [{ bearerAuth: [] }],
         responses: {
           200: {
@@ -311,6 +312,7 @@ const swaggerDefinition = {
         tags: ["Admin Help Requests"],
         summary: "List admin help requests",
         description: "Returns all help requests for admin review.",
+        security: [{ bearerAuth: [] }],
         responses: {
           200: {
             description: "List of help requests.",
@@ -335,6 +337,7 @@ const swaggerDefinition = {
       get: {
         tags: ["Admin Help Requests"],
         summary: "List pending help requests",
+        security: [{ bearerAuth: [] }],
         responses: {
           200: {
             description: "List of pending help requests.",
@@ -359,6 +362,7 @@ const swaggerDefinition = {
       get: {
         tags: ["Admin Help Requests"],
         summary: "Get admin help request by id",
+        security: [{ bearerAuth: [] }],
         parameters: [
           {
             name: "id",
@@ -397,6 +401,7 @@ const swaggerDefinition = {
       patch: {
         tags: ["Admin Help Requests"],
         summary: "Update help request",
+        security: [{ bearerAuth: [] }],
         parameters: [
           {
             name: "id",
@@ -443,6 +448,7 @@ const swaggerDefinition = {
       delete: {
         tags: ["Admin Help Requests"],
         summary: "Delete help request",
+        security: [{ bearerAuth: [] }],
         parameters: [
           {
             name: "id",
@@ -483,6 +489,7 @@ const swaggerDefinition = {
       patch: {
         tags: ["Admin Help Requests"],
         summary: "Approve help request",
+        security: [{ bearerAuth: [] }],
         parameters: [
           {
             name: "id",
@@ -515,6 +522,7 @@ const swaggerDefinition = {
       patch: {
         tags: ["Admin Help Requests"],
         summary: "Reject help request",
+        security: [{ bearerAuth: [] }],
         parameters: [
           {
             name: "id",
@@ -529,6 +537,178 @@ const swaggerDefinition = {
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/HelpRequest" },
+              },
+            },
+          },
+          500: {
+            description: "Server error.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/admin/donations": {
+      get: {
+        tags: ["Admin Donations"],
+        summary: "List donations for admin review",
+        description:
+          "Returns donation records using the currently mounted admin donation route. This route is protected by JWT authentication and admin authorization.",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: {
+            description: "List of donation records.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/DonationSuccessList" },
+              },
+            },
+          },
+          401: {
+            description: "Authentication required",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+          403: {
+            description: "Admin access required",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+          500: {
+            description: "Server error",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/admin/donations/{id}": {
+      get: {
+        tags: ["Admin Donations"],
+        summary: "Get donation by id",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Donation found.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Donation" },
+              },
+            },
+          },
+          404: {
+            description: "Donation not found.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+          500: {
+            description: "Server error.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+        },
+      },
+      patch: {
+        tags: ["Admin Donations"],
+        summary: "Update donation",
+        description:
+          "Updates an existing donation record using fields already supported by the current Donation model.",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
+        ],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/DonationUpdateBody" },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description: "Donation updated.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Donation" },
+              },
+            },
+          },
+          404: {
+            description: "Donation not found.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+          500: {
+            description: "Server error.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+        },
+      },
+      delete: {
+        tags: ["Admin Donations"],
+        summary: "Delete donation",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Donation deleted.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/DonationDeleteResponse" },
+              },
+            },
+          },
+          404: {
+            description: "Donation not found.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
               },
             },
           },
