@@ -456,7 +456,7 @@ const schemas = {
       firstName: { type: "string" },
       familyName: { type: "string" },
       email: { type: "string", format: "email" },
-      status: { type: "string", enum: ["active", "inactive"] },
+      status: { type: "string", enum: ["pending", "approved", "rejected"] },
     },
   },
 
@@ -519,7 +519,7 @@ const schemas = {
       delegateCity: { type: "string", nullable: true },
       delegateStreet: { type: "string", nullable: true },
       delegateMobile: { type: "string", nullable: true },
-      status: { type: "string", enum: ["active", "inactive"], example: "active" },
+      status: { type: "string", enum: ["pending", "approved", "rejected"], example: "pending" },
       createdAt: { type: "string", format: "date-time", nullable: true },
       updatedAt: { type: "string", format: "date-time", nullable: true },
       deletedAt: { type: "string", format: "date-time", nullable: true },
@@ -587,7 +587,7 @@ const schemas = {
     type: "object",
     required: ["status"],
     properties: {
-      status: { type: "string", enum: ["active", "inactive"], example: "inactive" },
+      status: { type: "string", enum: ["pending", "approved", "rejected"], example: "approved" },
     },
   },
 
