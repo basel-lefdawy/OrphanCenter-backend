@@ -56,7 +56,7 @@ const HelpRequest = sequelize.define("HelpRequest", {
   },
   userId: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
   },
 });
 
