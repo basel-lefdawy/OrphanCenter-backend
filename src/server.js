@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const app = require("./app");
-const { sequelize } = require("./config/db");
+const { connectDB } = require("./config/db");
 const seedDevAdmin = require("./utils/seedDevAdmin");
 
 require("./models/orphans/orphans");

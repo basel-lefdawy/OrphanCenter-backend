@@ -27,6 +27,11 @@ module.exports = (sequelize) => {
 
       GuaranteeType: DataTypes.STRING,
 
+      description: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
+
       GuardianID: {
         type: DataTypes.STRING,
         allowNull: false,
