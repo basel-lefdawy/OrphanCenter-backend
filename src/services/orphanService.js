@@ -1,4 +1,4 @@
-const Orphan = require("../models/orphans/orphans");
+const { Orphan } = require("../models");
 
 // Get all orphan /api/orphans
 const getAllOrphan = async ()=>{
