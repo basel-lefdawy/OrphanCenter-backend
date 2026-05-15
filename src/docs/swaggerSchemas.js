@@ -333,7 +333,14 @@ const schemas = {
   HelpRequestUpdateBody: {
     type: "object",
     description: "Partial help request update body accepted by the current admin update route.",
-    additionalProperties: true,
+    additionalProperties: false,
+    properties: {
+      status: {
+        type: "string",
+        enum: ["Pending", "Approved", "Rejected"],
+        example: "Approved",
+      },
+    },
   },
 
   HelpRequestSuccessOne: {
@@ -383,7 +390,7 @@ const schemas = {
     type: "object",
     description:
       "Partial donation fields accepted by the current admin update route. Use only for admin workflow fields that already exist on the Donation model.",
-    additionalProperties: true,
+    additionalProperties: false,
     properties: {
       donorName: { type: "string" },
       isAnonymous: { type: "boolean" },

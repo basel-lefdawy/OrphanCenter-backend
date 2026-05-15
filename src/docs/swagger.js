@@ -489,6 +489,8 @@ const swaggerDefinition = {
       patch: {
         tags: ["Admin Help Requests"],
         summary: "Approve help request",
+        description:
+          "Approves a pending help request through the admin review workflow. The backend may create or link related orphan and guardian records as part of the existing teammate-owned domain workflow.",
         security: [{ bearerAuth: [] }],
         parameters: [
           {
@@ -522,6 +524,8 @@ const swaggerDefinition = {
       patch: {
         tags: ["Admin Help Requests"],
         summary: "Reject help request",
+        description:
+          "Rejects a pending help request through the admin review workflow without creating orphan or guardian records.",
         security: [{ bearerAuth: [] }],
         parameters: [
           {
