@@ -198,7 +198,7 @@ module.exports = {
       tags: ["Sponsorships"],
       summary: "Create sponsorship",
       description:
-        "When paymentMethod is `bank_transfer`, bankName, accountNumber, accountHolderName, and iban are required.",
+        "When paymentMethod is `bank_transfer`, bankName, branchNumber, accountNumber, accountHolderName, and iban are required.",
       requestBody: {
         required: true,
         content: json("SponsorshipCreateBody"),
@@ -274,34 +274,6 @@ module.exports = {
           description: "Deleted",
           content: json("CrudMessageResponse"),
         },
-        404: err[404],
-        500: err[500],
-      },
-    },
-  },
-
-  "/api/sponsorships/{id}/status": {
-    patch: {
-      tags: ["Sponsorships"],
-      summary: "Update sponsorship status",
-      parameters: [
-        {
-          name: "id",
-          in: "path",
-          required: true,
-          schema: { type: "integer" },
-        },
-      ],
-      requestBody: {
-        required: true,
-        content: json("SponsorshipStatusBody"),
-      },
-      responses: {
-        200: {
-          description: "Status updated",
-          content: json("SponsorshipSuccessOne"),
-        },
-        400: err[400],
         404: err[404],
         500: err[500],
       },

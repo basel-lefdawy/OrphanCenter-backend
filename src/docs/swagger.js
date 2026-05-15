@@ -36,7 +36,9 @@ const swaggerDefinition = {
     { name: "Admin Donations", description: "Admin donation review workflow" },
     { name: "Sponsors", description: "Sponsors (الكفّال) CRUD and nested sponsorships" },
     { name: "Sponsorships", description: "Sponsorships (الكفالات) CRUD and status" },
+    { name: "Sponsorship Requests", description: "Sponsorship request submission and admin review" },
     { name: "Orphans", description: "Orphan records (public read access)" },
+    { name: "Admin Orphans", description: "Admin orphan CRUD" },
   ],
   paths: {
     "/health": {
@@ -73,6 +75,160 @@ const swaggerDefinition = {
         },
       },
     },
+    "/api/auth/register": {
+      post: {
+        tags: ["Auth"],
+        summary: "Register a local user",
+        description: "Creates or refreshes an unverified local user and sends an email verification link.",
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/RegisterBody" } } },
+        },
+        responses: {
+          201: {
+            description: "Verification email queued.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/AuthResponse" } } },
+          },
+          400: {
+            description: "Validation error.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } },
+          },
+          409: {
+            description: "Email is already registered.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } },
+          },
+          500: {
+            description: "Server error.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } },
+          },
+        },
+      },
+    },
+    "/api/auth/verify-email": {
+      post: {
+        tags: ["Auth"],
+        summary: "Verify email and obtain tokens",
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/VerifyEmailBody" } } },
+        },
+        responses: {
+          200: {
+            description: "Email verified successfully.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/AuthResponse" } } },
+          },
+          400: {
+            description: "Invalid or expired verification token.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } },
+          },
+        },
+      },
+    },
+    "/api/auth/login": {
+      post: {
+        tags: ["Auth"],
+        summary: "Login and obtain JWT tokens",
+        description: "Use this route in Swagger UI to obtain an access token for protected demo endpoints.",
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/LoginBody" } } },
+        },
+        responses: {
+          200: {
+            description: "Logged in successfully.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/AuthResponse" } } },
+          },
+          401: {
+            description: "Invalid email or password.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } },
+          },
+          403: {
+            description: "Email is not verified.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } },
+          },
+        },
+      },
+    },
+    "/api/auth/refresh": {
+      post: {
+        tags: ["Auth"],
+        summary: "Refresh JWT tokens",
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/RefreshTokenBody" } } },
+        },
+        responses: {
+          200: {
+            description: "Tokens refreshed successfully.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/AuthResponse" } } },
+          },
+          401: {
+            description: "Invalid, revoked, or expired refresh token.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } },
+          },
+        },
+      },
+    },
+    "/api/auth/logout": {
+      post: {
+        tags: ["Auth"],
+        summary: "Logout by revoking refresh token",
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/RefreshTokenBody" } } },
+        },
+        responses: {
+          200: {
+            description: "Logged out successfully.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/ApiSuccess" } } },
+          },
+          400: {
+            description: "Invalid or already revoked token.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } },
+          },
+        },
+      },
+    },
+    "/api/auth/forgot-password": {
+      post: {
+        tags: ["Auth"],
+        summary: "Request password reset email",
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/ForgotPasswordBody" } } },
+        },
+        responses: {
+          200: {
+            description: "Generic password reset response.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/ApiSuccess" } } },
+          },
+          400: {
+            description: "Validation error.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } },
+          },
+        },
+      },
+    },
+    "/api/auth/reset-password": {
+      post: {
+        tags: ["Auth"],
+        summary: "Reset password",
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/ResetPasswordBody" } } },
+        },
+        responses: {
+          200: {
+            description: "Password reset successfully.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/ApiSuccess" } } },
+          },
+          400: {
+            description: "Validation error or invalid reset token.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } },
+          },
+        },
+      },
+    },
     "/api/auth/facebook": {
       get: {
         tags: ["Auth"],
@@ -84,7 +240,15 @@ const swaggerDefinition = {
             description: "Redirects to Facebook OAuth authentication.",
           },
           500: {
-            description: "Server error or Facebook OAuth configuration error.",
+            description: "Server error.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+          503: {
+            description: "Facebook OAuth strategy is not configured.",
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/ApiError" },
@@ -120,6 +284,36 @@ const swaggerDefinition = {
                 schema: { $ref: "#/components/schemas/ApiError" },
               },
             },
+          },
+        },
+      },
+    },
+    "/api/auth/google": {
+      get: {
+        tags: ["Auth"],
+        summary: "Start Google login",
+        description:
+          "Starts the backend-driven Google OAuth flow. This route redirects the user's browser to Google for profile and email permission consent.",
+        responses: {
+          302: { description: "Redirects to Google OAuth authentication." },
+          503: {
+            description: "Google OAuth strategy is not configured.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } },
+          },
+        },
+      },
+    },
+    "/api/auth/google/callback": {
+      get: {
+        tags: ["Auth"],
+        summary: "Google OAuth callback",
+        description:
+          "Callback URL used by Google after authentication. On success, the backend redirects to the frontend success URL with access and refresh tokens in the query string.",
+        responses: {
+          302: { description: "Redirects to the frontend success or login error URL." },
+          503: {
+            description: "Google OAuth strategy is not configured.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } },
           },
         },
       },
@@ -231,7 +425,8 @@ const swaggerDefinition = {
         tags: ["Help Requests"],
         summary: "Create help request",
         description:
-          "Submits a public help request. IBAN and bankAccount are required when paymentMethod is BankAccount.",
+          "Submits a help request for the authenticated user. IBAN and bankAccount are required when paymentMethod is BankAccount.",
+        security: [{ bearerAuth: [] }],
         requestBody: {
           required: true,
           content: {
@@ -251,6 +446,14 @@ const swaggerDefinition = {
           },
           400: {
             description: "Validation error.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+          401: {
+            description: "Authentication required.",
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/ApiError" },
@@ -506,7 +709,7 @@ const swaggerDefinition = {
             description: "Help request approved.",
             content: {
               "application/json": {
-                schema: { $ref: "#/components/schemas/HelpRequestSuccessOne" },
+                schema: { $ref: "#/components/schemas/HelpRequestApprovalResponse" },
               },
             },
           },
@@ -791,6 +994,187 @@ const swaggerDefinition = {
               },
             },
           },
+        },
+      },
+    },
+    "/api/admin/orphans": {
+      get: {
+        tags: ["Admin Orphans"],
+        summary: "List all orphans for admin",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: {
+            description: "Array of orphan records.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/OrphanList" } } },
+          },
+          401: { description: "Authentication required", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+          403: { description: "Admin access required", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+          500: { description: "Server error", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+        },
+      },
+      post: {
+        tags: ["Admin Orphans"],
+        summary: "Create orphan",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/OrphanCreateBody" } } },
+        },
+        responses: {
+          201: {
+            description: "Orphan created.",
+            content: { "application/json": { schema: { $ref: "#/components/schemas/Orphan" } } },
+          },
+          401: { description: "Authentication required", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+          403: { description: "Admin access required", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+          500: { description: "Server error", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+        },
+      },
+    },
+    "/api/admin/orphans/{id}": {
+      get: {
+        tags: ["Admin Orphans"],
+        summary: "Get orphan by id for admin",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" } }],
+        responses: {
+          200: { description: "Orphan found.", content: { "application/json": { schema: { $ref: "#/components/schemas/Orphan" } } } },
+          404: { description: "Orphan not found.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+          500: { description: "Server error.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+        },
+      },
+      put: {
+        tags: ["Admin Orphans"],
+        summary: "Update orphan",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" } }],
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/OrphanUpdateBody" } } },
+        },
+        responses: {
+          200: { description: "Orphan updated.", content: { "application/json": { schema: { $ref: "#/components/schemas/Orphan" } } } },
+          404: { description: "Orphan not found.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+          500: { description: "Server error.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+        },
+      },
+      delete: {
+        tags: ["Admin Orphans"],
+        summary: "Delete orphan",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" } }],
+        responses: {
+          200: { description: "Orphan deleted.", content: { "application/json": { schema: { $ref: "#/components/schemas/CrudMessageResponse" } } } },
+          404: { description: "Orphan not found.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+          500: { description: "Server error.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+        },
+      },
+    },
+    "/api/sponsorship-requests": {
+      post: {
+        tags: ["Sponsorship Requests"],
+        summary: "Create sponsorship request",
+        description: "Creates a sponsorship request for the authenticated user. userId is read from the JWT.",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/SponsorshipRequestBody" } } },
+        },
+        responses: {
+          201: { description: "Sponsorship request created.", content: { "application/json": { schema: { $ref: "#/components/schemas/SponsorshipRequestSuccessOne" } } } },
+          400: { description: "Validation error.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+          401: { description: "Authentication required.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+          500: { description: "Server error.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+        },
+      },
+    },
+    "/api/admin/sponsorship-requests": {
+      get: {
+        tags: ["Sponsorship Requests"],
+        summary: "List sponsorship requests for admin",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: { description: "List of sponsorship requests.", content: { "application/json": { schema: { $ref: "#/components/schemas/SponsorshipRequestSuccessList" } } } },
+          401: { description: "Authentication required.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+          403: { description: "Admin access required.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+          500: { description: "Server error.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+        },
+      },
+    },
+    "/api/admin/sponsorship-requests/pending": {
+      get: {
+        tags: ["Sponsorship Requests"],
+        summary: "List pending sponsorship requests",
+        security: [{ bearerAuth: [] }],
+        responses: {
+          200: { description: "List of pending sponsorship requests.", content: { "application/json": { schema: { $ref: "#/components/schemas/SponsorshipRequestSuccessList" } } } },
+          401: { description: "Authentication required.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+          403: { description: "Admin access required.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+          500: { description: "Server error.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+        },
+      },
+    },
+    "/api/admin/sponsorship-requests/{id}": {
+      get: {
+        tags: ["Sponsorship Requests"],
+        summary: "Get sponsorship request by id",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" } }],
+        responses: {
+          200: { description: "Sponsorship request found.", content: { "application/json": { schema: { $ref: "#/components/schemas/SponsorshipRequestSuccessOne" } } } },
+          404: { description: "Sponsorship request not found.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+          500: { description: "Server error.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+        },
+      },
+      patch: {
+        tags: ["Sponsorship Requests"],
+        summary: "Update sponsorship request",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" } }],
+        requestBody: {
+          required: true,
+          content: { "application/json": { schema: { $ref: "#/components/schemas/SponsorshipRequestUpdateBody" } } },
+        },
+        responses: {
+          200: { description: "Sponsorship request updated.", content: { "application/json": { schema: { $ref: "#/components/schemas/SponsorshipRequestSuccessOne" } } } },
+          400: { description: "Validation error.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+          404: { description: "Sponsorship request not found.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+          500: { description: "Server error.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+        },
+      },
+      delete: {
+        tags: ["Sponsorship Requests"],
+        summary: "Delete sponsorship request",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" } }],
+        responses: {
+          200: { description: "Sponsorship request deleted.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiSuccess" } } } },
+          404: { description: "Sponsorship request not found.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+          500: { description: "Server error.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+        },
+      },
+    },
+    "/api/admin/sponsorship-requests/{id}/approve": {
+      patch: {
+        tags: ["Sponsorship Requests"],
+        summary: "Approve sponsorship request",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" } }],
+        responses: {
+          200: { description: "Sponsorship request approved.", content: { "application/json": { schema: { $ref: "#/components/schemas/SponsorshipRequestSuccessOne" } } } },
+          500: { description: "Server error.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
+        },
+      },
+    },
+    "/api/admin/sponsorship-requests/{id}/reject": {
+      patch: {
+        tags: ["Sponsorship Requests"],
+        summary: "Reject sponsorship request",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" } }],
+        responses: {
+          200: { description: "Sponsorship request rejected.", content: { "application/json": { schema: { $ref: "#/components/schemas/SponsorshipRequestSuccessOne" } } } },
+          500: { description: "Server error.", content: { "application/json": { schema: { $ref: "#/components/schemas/ApiError" } } } },
         },
       },
     },
