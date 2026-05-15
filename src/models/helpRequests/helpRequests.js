@@ -54,6 +54,10 @@ const HelpRequest = sequelize.define("HelpRequest", {
     type: DataTypes.ENUM("Pending", "Approved", "Rejected"),
     defaultValue: "Pending",
   },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
 });
 
 // encryption

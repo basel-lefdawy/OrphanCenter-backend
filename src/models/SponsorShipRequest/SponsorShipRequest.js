@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-
+const user = require("../auth/user");
 module.exports = (sequelize) => {
   const SponsorshipRequest = sequelize.define(
     "SponsorshipRequest",
@@ -205,6 +205,10 @@ module.exports = (sequelize) => {
         defaultValue: "pending",
         comment: "حالة طلب الكفالة",
       },
+      userId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      }
     },
     {
       tableName: "sponsorship_requests",
@@ -221,6 +225,11 @@ module.exports = (sequelize) => {
       as: "orphan",
     });
   };
-
+  user.hasMany(SponsorshipRequest, {
+    foreignKey: "userId",
+  });
+  SponsorshipRequest.belongsTo(user, {
+    foreignKey: "userId",
+  });
   return SponsorshipRequest;
 };

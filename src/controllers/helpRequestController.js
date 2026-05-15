@@ -20,10 +20,12 @@ const createRequest = async (req, res) => {
 
     const validatedData =
       helpRequestSchema.parse(req.body);
+    const userId = req.user.id; // I took it from requireAuth middleware
 
     const data =
       await HelpRequestService.create(
-        validatedData
+        validatedData,
+        userId
       );
 
     return res.status(201).json({
