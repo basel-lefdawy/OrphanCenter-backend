@@ -36,6 +36,7 @@ const swaggerDefinition = {
     { name: "Admin Donations", description: "Admin donation review workflow" },
     { name: "Sponsors", description: "Sponsors (الكفّال) CRUD and nested sponsorships" },
     { name: "Sponsorships", description: "Sponsorships (الكفالات) CRUD and status" },
+    { name: "Orphans", description: "Orphan records (public read access)" },
   ],
   paths: {
     "/health": {
@@ -541,6 +542,72 @@ const swaggerDefinition = {
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/HelpRequest" },
+              },
+            },
+          },
+          500: {
+            description: "Server error.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/orphans": {
+      get: {
+        tags: ["Orphans"],
+        summary: "List all orphans",
+        description:
+          "Returns all orphan records from the database. This is a public route (no authentication required). Used by both the public orphans page and the admin OrphansList for read-only display.",
+        responses: {
+          200: {
+            description: "Array of orphan records.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/OrphanList" },
+              },
+            },
+          },
+          500: {
+            description: "Server error.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/orphans/{id}": {
+      get: {
+        tags: ["Orphans"],
+        summary: "Get orphan by id",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" },
+          },
+        ],
+        responses: {
+          200: {
+            description: "Orphan found.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/Orphan" },
+              },
+            },
+          },
+          404: {
+            description: "Orphan not found.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
               },
             },
           },
