@@ -15,6 +15,7 @@ const sponsorshipRequestRoutes = require("./sponsorshipRequestRouter");
 const sponsorshipRequestAdminRoutes = require("./sponsorshipRequestAdminRoutes");
 const sponsorRoutes = require("./SponsorRoutes");
 const sponsorShipRoutes = require("./SponsorShipRoutes");
+const orphanAdminRoutes = require("./orphanAdminRoutes");
 
 const router = express.Router();
 
