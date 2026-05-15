@@ -184,7 +184,9 @@ const approve = async (id) => {
     return { req, guardian, orphan };
 
   } catch (error) {
-    await t.rollback();
+    if (!t.finished) {
+      await t.rollback();
+    }
 
     if (error.name === "SequelizeUniqueConstraintError") {
       const messages = error.errors.map((e) => {
