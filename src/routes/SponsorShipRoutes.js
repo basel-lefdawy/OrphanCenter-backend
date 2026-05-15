@@ -1,4 +1,6 @@
 const express = require("express");
+const validate = require("../middleware/validate");
+const { sponsorshipSchema, sponsorshipUpdateSchema, sponsorshipStatusSchema } = require("../schemas/sponsorshipSchema");
 const router = express.Router();
 
 const {
@@ -11,11 +13,9 @@ const {
 } = require("../controllers/sponsorshipController");
 
 // ─── Sponsorship Routes ────────────────────────────────────
-router.get("/", getAllSponsorships);                       // GET    /sponsorships
-router.get("/:id", getSponsorshipById);                   // GET    /sponsorships/:id
-router.post("/", createSponsorship);                      // POST   /sponsorships
-router.put("/:id", updateSponsorship);                    // PUT    /sponsorships/:id
-router.delete("/:id", deleteSponsorship);                 // DELETE /sponsorships/:id
-router.patch("/:id/status", updateSponsorshipStatus);     // PATCH  /sponsorships/:id/status
-
+router.get("/", getAllSponsorships);
+router.get("/:id", getSponsorshipById);
+router.post("/", validate(sponsorshipSchema), createSponsorship);
+router.put("/:id", validate(sponsorshipUpdateSchema), updateSponsorship);
+router.delete("/:id", deleteSponsorship);
 module.exports = router;

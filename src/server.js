@@ -18,8 +18,11 @@ const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
-    await connectDB();
-    console.log("✅ Database connected and synced");
+    await sequelize.authenticate();
+    console.log("✅ Database connected");
+
+    await sequelize.sync({ alter: true });
+    console.log("✅ Database synced");
 
     if (process.env.NODE_ENV !== "production") {
       await seedDevAdmin();

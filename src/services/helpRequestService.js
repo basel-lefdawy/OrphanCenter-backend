@@ -1,8 +1,6 @@
 const { sequelize } = require("../config/db");
 
-const HelpRequest = require("../models/helpRequests/helpRequests");
-const Orphan = require("../models/orphans/orphans");
-const Guardian = require("../models/guardian/guardian");
+const { Orphan,HelpRequest, Guardian,} = require("../models");
 
 const { decrypt } = require("../utils/crypto");
 

@@ -1,4 +1,5 @@
 const { Sponsorship, Sponsor, Orphan } = require("../models");
+const { decrypt } = require("../utils/crypto");
 
 const SPONSOR_INCLUDE = {
   model: Sponsor,
@@ -10,10 +11,7 @@ const ORPHAN_INCLUDE = {
   as: "orphan",
 };
 
-const LIST_INCLUDES = [
-  SPONSOR_INCLUDE,
-  ORPHAN_INCLUDE,
-];
+const LIST_INCLUDES = [SPONSOR_INCLUDE, ORPHAN_INCLUDE];
 
 function httpError(statusCode, message) {
   const err = new Error(message);
@@ -21,16 +19,32 @@ function httpError(statusCode, message) {
   return err;
 }
 
+const decryptSponsorship = (sponsorship) => {
+  if (!sponsorship) return null;
+
+  const obj = sponsorship.toJSON();
+
+  return {
+    ...obj,
+    accountNumber: obj.accountNumber ? decrypt(obj.accountNumber) : null,
+    iban: obj.iban ? decrypt(obj.iban) : null,
+  };
+};
+
 const getAll = async () => {
-  return Sponsorship.findAll({
+  const sponsorships = await Sponsorship.findAll({
     include: LIST_INCLUDES,
   });
+
+  return sponsorships.map(decryptSponsorship);
 };
 
 const getById = async (id) => {
-  return Sponsorship.findByPk(id, {
+  const sponsorship = await Sponsorship.findByPk(id, {
     include: LIST_INCLUDES,
   });
+
+  return decryptSponsorship(sponsorship);
 };
 
 const getBySponsorId = async (sponsorId) => {
@@ -40,10 +54,12 @@ const getBySponsorId = async (sponsorId) => {
     throw httpError(404, "الكفيل غير موجود");
   }
 
-  return Sponsorship.findAll({
+  const sponsorships = await Sponsorship.findAll({
     where: { sponsorId },
     include: [ORPHAN_INCLUDE],
   });
+
+  return sponsorships.map(decryptSponsorship);
 };
 
 const create = async (body) => {
@@ -59,12 +75,7 @@ const create = async (body) => {
   } = body;
 
   if (paymentMethod === "bank_transfer") {
-    if (
-      !bankName ||
-      !accountNumber ||
-      !accountHolderName ||
-      !iban
-    ) {
+    if (!bankName || !accountNumber || !accountHolderName || !iban) {
       throw httpError(
         400,
         "يرجى تعبئة جميع تفاصيل البنك عند اختيار التحويل البنكي"
@@ -85,34 +96,16 @@ const create = async (body) => {
     throw httpError(404, "اليتيم غير موجود");
   }
 
-  return Sponsorship.create({
+  const sponsorship = await Sponsorship.create({
     ...body,
-
-    bankName:
-      paymentMethod === "bank_transfer"
-        ? bankName
-        : null,
-
-    branchNumber:
-      paymentMethod === "bank_transfer"
-        ? branchNumber
-        : null,
-
-    accountNumber:
-      paymentMethod === "bank_transfer"
-        ? accountNumber
-        : null,
-
-    accountHolderName:
-      paymentMethod === "bank_transfer"
-        ? accountHolderName
-        : null,
-
-    iban:
-      paymentMethod === "bank_transfer"
-        ? iban
-        : null,
+    bankName: paymentMethod === "bank_transfer" ? bankName : null,
+    branchNumber: paymentMethod === "bank_transfer" ? branchNumber : null,
+    accountNumber: paymentMethod === "bank_transfer" ? accountNumber : null,
+    accountHolderName: paymentMethod === "bank_transfer" ? accountHolderName : null,
+    iban: paymentMethod === "bank_transfer" ? iban : null,
   });
+
+  return decryptSponsorship(sponsorship);
 };
 
 const update = async (id, body) => {
@@ -124,10 +117,7 @@ const update = async (id, body) => {
 
   const payload = { ...body };
 
-  if (
-    payload.paymentMethod &&
-    payload.paymentMethod !== "bank_transfer"
-  ) {
+  if (payload.paymentMethod && payload.paymentMethod !== "bank_transfer") {
     payload.bankName = null;
     payload.branchNumber = null;
     payload.accountNumber = null;
@@ -137,7 +127,7 @@ const update = async (id, body) => {
 
   await sponsorship.update(payload);
 
-  return sponsorship;
+  return decryptSponsorship(sponsorship);
 };
 
 const remove = async (id) => {
@@ -151,15 +141,7 @@ const remove = async (id) => {
 };
 
 const updateStatus = async (id, status) => {
-  if (
-    ![
-      "pending",
-      "approved",
-      "rejected",
-      "active",
-      "expired",
-    ].includes(status)
-  ) {
+  if (!["pending", "approved", "rejected", "active", "expired"].includes(status)) {
     throw httpError(400, "الحالة غير صحيحة");
   }
 
@@ -171,7 +153,7 @@ const updateStatus = async (id, status) => {
 
   await sponsorship.update({ status });
 
-  return sponsorship;
+  return decryptSponsorship(sponsorship);
 };
 
 module.exports = {

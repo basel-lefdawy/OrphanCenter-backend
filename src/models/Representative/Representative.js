@@ -1,118 +1,77 @@
 const { DataTypes } = require("sequelize");
 
 module.exports = (sequelize) => {
-  const Sponsor = sequelize.define(
-    "Sponsor",
+  const Representative = sequelize.define(
+    "Representative",
     {
-      // ─── Primary Key ────────────────────────────────────
       id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
-        comment: "sponsor_id — PK",
       },
-
-      // ─── معلومات الكفيل ─────────────────────────────────
       identityNumber: {
         type: DataTypes.STRING(20),
-        allowNull: false,
-        unique: true,
-        comment: "رقم الهوية",
+        allowNull: true,
       },
       firstName: {
         type: DataTypes.STRING(50),
-        allowNull: false,
-        comment: "الاسم",
+        allowNull: true,
       },
       fatherName: {
         type: DataTypes.STRING(50),
-        allowNull: false,
-        comment: "الأب",
+        allowNull: true,
       },
       grandfatherName: {
         type: DataTypes.STRING(50),
-        allowNull: false,
-        comment: "الجد",
+        allowNull: true,
       },
       familyName: {
         type: DataTypes.STRING(50),
-        allowNull: false,
-        comment: "العائلة",
-      },
-      dateOfBirth: {
-        type: DataTypes.DATEONLY,
-        allowNull: false,
-        comment: "تاريخ الميلاد",
+        allowNull: true,
       },
       gender: {
         type: DataTypes.ENUM("male", "female"),
-        allowNull: false,
-        comment: "الجنس",
+        allowNull: true,
       },
       jobType: {
         type: DataTypes.STRING(100),
-        allowNull: false,
-        comment: "نوع العمل",
+        allowNull: true,
+      },
+      relationship: {
+        type: DataTypes.STRING(50),
+        allowNull: true,
       },
       country: {
         type: DataTypes.STRING(60),
-        allowNull: false,
-        comment: "الدولة",
+        allowNull: true,
       },
       city: {
         type: DataTypes.STRING(60),
-        allowNull: false,
-        comment: "المدينة",
+        allowNull: true,
       },
       street: {
         type: DataTypes.STRING(100),
         allowNull: true,
-        comment: "الشارع",
       },
       mobile: {
         type: DataTypes.STRING(20),
-        allowNull: false,
-        comment: "رقم الجوال",
-      },
-      phone: {
-        type: DataTypes.STRING(20),
         allowNull: true,
-        comment: "الهاتف",
-      },
-      email: {
-        type: DataTypes.STRING(100),
-        allowNull: false,
-        unique: true,
-        comment: "البريد الإلكتروني",
-      },
-
-      // ─── حالة الكفيل ─────────────────────────────────────
-      status: {
-        type: DataTypes.ENUM("pending", "approved", "rejected"),
-        defaultValue: "pending",
-        comment: "حالة طلب الكفيل",
       },
     },
     {
-      tableName: "sponsors",
+      tableName: "representatives",
       timestamps: true,
       paranoid: true,
       underscored: true,
     }
   );
 
-  // ─── العلاقات ─────────────────────────────────────────
-  Sponsor.associate = (models) => {
-    Sponsor.hasMany(models.Sponsorship, {
-      foreignKey: "sponsorId",
-      as: "sponsorships",
-    });
-
-    Sponsor.hasOne(models.Representative, {
-      foreignKey: "sponsorId",
-      as: "representative",
+  Representative.associate = (models) => {
+    Representative.hasMany(models.Sponsor, {
+      foreignKey: "representativeId",
+      as: "sponsors",
     });
   };
 
-  return Sponsor;
+  return Representative;
 };
