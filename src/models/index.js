@@ -3,7 +3,7 @@ const { sequelize } = require("../config/db");
 const defineSponsor = require("./sponsors/sponsors");
 const defineSponsorship = require("./sponsorShip/sponsorShip");
 const defineOrphan = require("./orphans/orphans");
-const defineSponsorshipRequest = require("./sponsorshipRequest/sponsorshipRequest");
+const defineSponsorshipRequest = require("./SponsorShipRequest/SponsorShipRequest");
 const defineRepresentative = require("./Representative/Representative");
 
 const SponsorshipRequest = defineSponsorshipRequest(sequelize);
