@@ -33,7 +33,7 @@ const schemas = {
   AuthUser: {
     type: "object",
     properties: {
-      id: { type: "string", example: "facebook:123456789" },
+      id: { type: "integer", example: 1 },
       provider: { type: "string", example: "facebook" },
       name: { type: "string", example: "Facebook User" },
       email: { type: "string", nullable: true, example: "user@example.com" },
@@ -59,7 +59,7 @@ const schemas = {
       message: "Success",
       data: {
         user: {
-          id: "facebook:123456789",
+          id: 1,
           provider: "facebook",
           name: "Facebook User",
           email: "user@example.com",
@@ -333,7 +333,14 @@ const schemas = {
   HelpRequestUpdateBody: {
     type: "object",
     description: "Partial help request update body accepted by the current admin update route.",
-    additionalProperties: true,
+    additionalProperties: false,
+    properties: {
+      status: {
+        type: "string",
+        enum: ["Pending", "Approved", "Rejected"],
+        example: "Approved",
+      },
+    },
   },
 
   HelpRequestSuccessOne: {
@@ -352,6 +359,55 @@ const schemas = {
   },
 
   HelpRequestDeleteResponse: {
+    type: "object",
+    required: ["success"],
+    properties: {
+      success: { type: "boolean", example: true },
+    },
+  },
+
+  Donation: {
+    type: "object",
+    description: "Donation record as returned by the current donation admin API.",
+    properties: {
+      id: { type: "integer", example: 1 },
+      donationNumber: { type: "string", example: "DON-20260515-001" },
+      userId: { type: "integer", nullable: true, example: null },
+      donorName: { type: "string", example: "Anonymous" },
+      isAnonymous: { type: "boolean", example: false },
+      amount: { type: "number", example: 50 },
+      currency: { type: "string", example: "ils" },
+      method: { type: "string", nullable: true, example: "card" },
+      status: { type: "string", example: "pending" },
+      paymentIntentId: { type: "string", nullable: true, example: "pi_123" },
+      email: { type: "string", nullable: true, example: "donor@example.com" },
+      createdAt: { type: "string", format: "date-time", nullable: true },
+      updatedAt: { type: "string", format: "date-time", nullable: true },
+    },
+  },
+
+  DonationUpdateBody: {
+    type: "object",
+    description:
+      "Partial donation fields accepted by the current admin update route. Use only for admin workflow fields that already exist on the Donation model.",
+    additionalProperties: false,
+    properties: {
+      donorName: { type: "string" },
+      isAnonymous: { type: "boolean" },
+      amount: { type: "number" },
+      currency: { type: "string" },
+      method: { type: "string" },
+      status: { type: "string", example: "paid" },
+      email: { type: "string", format: "email" },
+    },
+  },
+
+  DonationSuccessList: {
+    type: "array",
+    items: { $ref: "#/components/schemas/Donation" },
+  },
+
+  DonationDeleteResponse: {
     type: "object",
     required: ["success"],
     properties: {

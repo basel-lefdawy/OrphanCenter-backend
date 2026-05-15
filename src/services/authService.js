@@ -64,21 +64,21 @@ const register = async ({ name, email, password }) => {
 
     const user = existingUser
         ? await existingUser.update({
-              name,
-              password: hashedPassword,
-              provider: "local",
-              emailVerificationToken: verificationTokenHash,
-              emailVerificationExpires: verificationExpires,
-              isEmailVerified: false,
-          })
+            name,
+            password: hashedPassword,
+            provider: "local",
+            emailVerificationToken: verificationTokenHash,
+            emailVerificationExpires: verificationExpires,
+            isEmailVerified: false,
+        })
         : await User.create({
-              name,
-              email,
-              password: hashedPassword,
-              emailVerificationToken: verificationTokenHash,
-              emailVerificationExpires: verificationExpires,
-              isEmailVerified: false,
-          });
+            name,
+            email,
+            password: hashedPassword,
+            emailVerificationToken: verificationTokenHash,
+            emailVerificationExpires: verificationExpires,
+            isEmailVerified: false,
+        });
 
     const verificationUrl = `${process.env.CLIENT_URL || "http://localhost:5173"}/auth/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`;
     await sendEmailVerificationEmail({
