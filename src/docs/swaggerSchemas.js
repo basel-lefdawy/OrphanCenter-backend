@@ -415,6 +415,29 @@ const schemas = {
     },
   },
 
+  Orphan: {
+    type: "object",
+    description: "Orphan record as returned by the current Orphan model (GET /api/orphans).",
+    properties: {
+      id: { type: "integer", example: 1 },
+      OrphanID: { type: "string", example: "OR-1001" },
+      OrphanName: { type: "string", example: "Ahmed" },
+      OrphanFatherName: { type: "string", example: "Ali" },
+      OrphanGrandfatherName: { type: "string", example: "Hassan" },
+      OrphanFamilyName: { type: "string", example: "Saleh" },
+      OrphanBirthDate: { type: "string", format: "date", example: "2018-05-10" },
+      gender: { type: "string", example: "Male" },
+      GuaranteeType: { type: "string", example: "Educational" },
+      GuardianID: { type: "string", example: "G-1001" },
+      RequestID: { type: "integer", nullable: true, example: 1 },
+    },
+  },
+
+  OrphanList: {
+    type: "array",
+    items: { $ref: "#/components/schemas/Orphan" },
+  },
+
   CrudMessageResponse: {
     type: "object",
     required: ["success", "message"],
