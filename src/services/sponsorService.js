@@ -85,7 +85,7 @@ const remove = async (id) => {
 };
 
 const updateStatus = async (id, status) => {
-  if (!["active", "inactive"].includes(status)) {
+  if (!["pending", "approved", "rejected"].includes(status)) {
     throw httpError(400, "الحالة غير صحيحة");
   }
 
