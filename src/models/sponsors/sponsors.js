@@ -86,6 +86,15 @@ module.exports = (sequelize) => {
         comment: "البريد الإلكتروني",
       },
 
+      representativeId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: { model: "representatives", key: "id" },
+        onUpdate: "CASCADE",
+        onDelete: "SET NULL",
+        comment: "المنفذ الذي يمثّل الكفيل",
+      },
+
       // ─── معلومات المفوّض (inline) ────────────────────────
       delegateIdentityNumber: {
         type: DataTypes.STRING(20),
@@ -173,6 +182,12 @@ module.exports = (sequelize) => {
     Sponsor.hasMany(models.Sponsorship, {
       foreignKey: "sponsorId",
       as: "sponsorships",
+    });
+
+    // كل كفيل مرتبط بممثل واحد
+    Sponsor.belongsTo(models.Representative, {
+      foreignKey: "representativeId",
+      as: "representative",
     });
   };
 

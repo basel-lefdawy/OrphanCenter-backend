@@ -1,4 +1,6 @@
+const { Op } = require("sequelize");
 const { SponsorshipRequest, Sponsor, Sponsorship, Representative, Orphan, sequelize } = require("../models");
+const { decrypt } = require("../utils/crypto");
 
 const REQUEST_INCLUDE = {
   model: Orphan,
@@ -11,21 +13,61 @@ function httpError(statusCode, message) {
   return err;
 }
 
+const decryptRequest = (request) => {
+  if (!request) return null;
+
+  const obj = request.toJSON();
+
+  return {
+    ...obj,
+    accountNumber: obj.accountNumber ? decrypt(obj.accountNumber) : null,
+    iban: obj.iban ? decrypt(obj.iban) : null,
+  };
+};
+
+const decryptSponsorship = (sponsorship) => {
+  if (!sponsorship) return null;
+
+  const obj = sponsorship.toJSON();
+
+  return {
+    ...obj,
+    accountNumber: obj.accountNumber ? decrypt(obj.accountNumber) : null,
+    iban: obj.iban ? decrypt(obj.iban) : null,
+  };
+};
+
 const getAll = async () => {
-  return SponsorshipRequest.findAll({
+  const requests = await SponsorshipRequest.findAll({
     include: [REQUEST_INCLUDE],
+    order: [["createdAt", "DESC"]],
   });
+
+  return requests.map(decryptRequest);
+};
+
+const getPending = async () => {
+  const requests = await SponsorshipRequest.findAll({
+    where: { status: "pending" },
+    include: [REQUEST_INCLUDE],
+    order: [["createdAt", "DESC"]],
+  });
+
+  return requests.map(decryptRequest);
 };
 
 const getById = async (id) => {
-  return SponsorshipRequest.findByPk(id, {
+  const request = await SponsorshipRequest.findByPk(id, {
     include: [REQUEST_INCLUDE],
   });
+
+  return decryptRequest(request);
 };
 
 const create = async (body) => {
   try {
-    return await SponsorshipRequest.create(body);
+    const request = await SponsorshipRequest.create(body);
+    return decryptRequest(request);
   } catch (error) {
     if (error.name === "SequelizeValidationError") {
       const msg =
@@ -57,7 +99,7 @@ const update = async (id, body) => {
 
   try {
     await request.update(body);
-    return request;
+    return decryptRequest(request);
   } catch (error) {
     if (error.name === "SequelizeValidationError") {
       const msg =
@@ -102,27 +144,53 @@ const updateStatus = async (id, status) => {
 
   await request.update({ status });
 
-  return request;
+  return decryptRequest(request);
 };
 
-// ─── Approve ──────────────────────────────────────────
 const approve = async (id) => {
-  const request = await SponsorshipRequest.findByPk(id, {
-    include: [REQUEST_INCLUDE],
-  });
+  return sequelize.transaction(async (transaction) => {
+    const request = await SponsorshipRequest.findByPk(id, {
+      include: [REQUEST_INCLUDE],
+      transaction,
+      lock: transaction.LOCK.UPDATE,
+    });
 
-  if (!request) {
-    throw httpError(404, "طلب الكفالة غير موجود");
-  }
+    if (!request) {
+      throw httpError(404, "طلب الكفالة غير موجود");
+    }
 
-  if (request.status !== "pending") {
-    throw httpError(400, "الطلب تمت معالجته مسبقاً");
-  }
+    if (request.status !== "pending") {
+      throw httpError(409, "الطلب تمت معالجته مسبقاً");
+    }
 
-  const transaction = await sequelize.transaction();
+    const existingSponsor = await Sponsor.findOne({
+      where: {
+        [Op.or]: [
+          { identityNumber: request.identityNumber },
+          { email: request.email },
+        ],
+      },
+      transaction,
+      lock: transaction.LOCK.UPDATE,
+    });
 
-  try {
-    // 1. إنشاء الكفيل
+    if (existingSponsor) {
+      throw httpError(409, "رقم الهوية أو البريد الإلكتروني للكفيل مسجل مسبقاً");
+    }
+
+    const activeSponsorship = await Sponsorship.findOne({
+      where: {
+        orphanId: request.orphanId,
+        status: "active",
+      },
+      transaction,
+      lock: transaction.LOCK.UPDATE,
+    });
+
+    if (activeSponsorship) {
+      throw httpError(409, "يوجد كفالة نشطة لهذا اليتيم بالفعل");
+    }
+
     const sponsor = await Sponsor.create(
       {
         identityNumber: request.identityNumber,
@@ -144,7 +212,6 @@ const approve = async (id) => {
       { transaction }
     );
 
-    // 2. إنشاء الكفالة
     const sponsorship = await Sponsorship.create(
       {
         sponsorId: sponsor.id,
@@ -163,7 +230,6 @@ const approve = async (id) => {
       { transaction }
     );
 
-    // 3. إنشاء المفوض (اختياري)
     let representative = null;
     if (request.delegateFirstName) {
       representative = await Representative.create(
@@ -186,29 +252,40 @@ const approve = async (id) => {
       );
     }
 
-    // 4. تحديث حالة الطلب
     await request.update({ status: "approved" }, { transaction });
 
-    await transaction.commit();
+    return {
+      sponsor,
+      sponsorship: decryptSponsorship(sponsorship),
+      representative,
+    };
+  });
+};
 
-    return { sponsor, sponsorship, representative };
-  } catch (error) {
-    await transaction.rollback();
+const reject = async (id) => {
+  const request = await SponsorshipRequest.findByPk(id);
 
-    if (error.name === "SequelizeUniqueConstraintError") {
-      throw httpError(409, "رقم الهوية أو البريد الإلكتروني مسجل مسبقاً");
-    }
-
-    throw error;
+  if (!request) {
+    throw httpError(404, "طلب الكفالة غير موجود");
   }
+
+  if (request.status !== "pending") {
+    throw httpError(409, "الطلب تمت معالجته مسبقاً");
+  }
+
+  await request.update({ status: "rejected" });
+
+  return decryptRequest(request);
 };
 
 module.exports = {
   getAll,
+  getPending,
   getById,
   create,
   update,
   remove,
   updateStatus,
   approve,
+  reject,
 };

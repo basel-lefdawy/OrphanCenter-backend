@@ -2,7 +2,7 @@ const { z } = require("zod");
 
 const phoneRegex = /^[0-9]{10,15}$/;
 
-const sponsorshipRequestSchema = z.object({
+const sponsorshipRequestBaseSchema = z.object({
   // ─── معلومات الكفيل ─────────────────────────────────
   identityNumber: z.string().min(1).max(20),
   firstName: z.string().min(1).max(50),
@@ -49,4 +49,44 @@ const sponsorshipRequestSchema = z.object({
   status: z.enum(["pending", "approved", "rejected"]).optional(),
 });
 
-module.exports = { sponsorshipRequestSchema };
+const sponsorshipRequestSchema = sponsorshipRequestBaseSchema.refine(
+  (data) => {
+    if (data.paymentMethod === "bank_transfer") {
+      return (
+        !!data.bankName &&
+        !!data.branchNumber &&
+        !!data.accountNumber &&
+        !!data.accountHolderName &&
+        !!data.iban
+      );
+    }
+    return true;
+  },
+  {
+    message:
+      "bankName, branchNumber, accountNumber, accountHolderName, and iban are required when paymentMethod is bank_transfer",
+    path: ["paymentMethod"],
+  }
+);
+
+const sponsorshipRequestUpdateSchema = sponsorshipRequestBaseSchema.partial().refine(
+  (data) => {
+    if (data.paymentMethod === "bank_transfer") {
+      return (
+        !!data.bankName &&
+        !!data.branchNumber &&
+        !!data.accountNumber &&
+        !!data.accountHolderName &&
+        !!data.iban
+      );
+    }
+    return true;
+  },
+  {
+    message:
+      "bankName, branchNumber, accountNumber, accountHolderName, and iban are required when paymentMethod is bank_transfer",
+    path: ["paymentMethod"],
+  }
+);
+
+module.exports = { sponsorshipRequestSchema, sponsorshipRequestUpdateSchema };

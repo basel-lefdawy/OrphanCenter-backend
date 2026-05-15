@@ -1,14 +1,14 @@
 const sponsorshipService = require("../services/sponsorshipService");
+const { sponsorshipSchema, sponsorshipUpdateSchema, sponsorshipStatusSchema } = require("../schemas/sponsorshipSchema");
 const { getClientErrorMessage } = require("../utils/errorMessage");
-
+const { sendSuccess, sendError } = require("../utils/apiResponse");
 
 const getAllSponsorships = async (req, res) => {
   try {
     const sponsorships = await sponsorshipService.getAll();
-    res.status(200).json({ success: true, data: sponsorships });
+    return sendSuccess(res, sponsorships);
   } catch (error) {
-    const status = error.statusCode || 500;
-    res.status(status).json({ success: false, message: getClientErrorMessage(error) });
+    return sendError(res, getClientErrorMessage(error), error.statusCode || 500);
   }
 };
 
@@ -16,79 +16,71 @@ const getSponsorshipById = async (req, res) => {
   try {
     const sponsorship = await sponsorshipService.getById(req.params.id);
     if (!sponsorship) {
-      return res
-        .status(404)
-        .json({ success: false, message: "الكفالة غير موجودة" });
+      return sendError(res, "الكفالة غير موجودة", 404);
     }
-    res.status(200).json({ success: true, data: sponsorship });
+    return sendSuccess(res, sponsorship);
   } catch (error) {
-    const status = error.statusCode || 500;
-    res.status(status).json({ success: false, message: getClientErrorMessage(error) });
+    return sendError(res, getClientErrorMessage(error), error.statusCode || 500);
   }
 };
 
 const getSponsorshipsBySponsor = async (req, res) => {
   try {
     const sponsorships = await sponsorshipService.getBySponsorId(req.params.sponsorId);
-    res.status(200).json({ success: true, data: sponsorships });
+    return sendSuccess(res, sponsorships);
   } catch (error) {
-    const status = error.statusCode || 500;
-    res.status(status).json({ success: false, message: getClientErrorMessage(error) });
+    return sendError(res, getClientErrorMessage(error), error.statusCode || 500);
   }
 };
 
 const createSponsorship = async (req, res) => {
   try {
-    const validatedData = sponsorShipSchema.parse(req.body);
+    const validatedData = sponsorshipSchema.parse(req.body);
     const sponsorship = await sponsorshipService.create(validatedData);
-    res.status(201).json({ success: true, data: sponsorship });
+    return sendSuccess(res, sponsorship, "تم إنشاء الكفالة بنجاح", 201);
   } catch (error) {
-    const status = error.statusCode || 500;
-    res.status(status).json({ success: false, message: getClientErrorMessage(error) });
+    if (error.name === "ZodError") {
+      return sendError(res, "Validation Error", 400, error.issues || []);
+    }
+    return sendError(res, getClientErrorMessage(error), error.statusCode || 500);
   }
 };
 
 const updateSponsorship = async (req, res) => {
   try {
-    const validatedData = sponsorShipSchema.partial().parse(req.body);
+    const validatedData = sponsorshipUpdateSchema.parse(req.body);
     const sponsorship = await sponsorshipService.update(req.params.id, validatedData);
-    res.status(200).json({ success: true, data: sponsorship });
+    return sendSuccess(res, sponsorship);
   } catch (error) {
-    const status = error.statusCode || 500;
-    res.status(status).json({ success: false, message: getClientErrorMessage(error) });
+    if (error.name === "ZodError") {
+      return sendError(res, "Validation Error", 400, error.issues || []);
+    }
+    return sendError(res, getClientErrorMessage(error), error.statusCode || 500);
   }
 };
 
 const deleteSponsorship = async (req, res) => {
   try {
     await sponsorshipService.remove(req.params.id);
-    res.status(200).json({ success: true, message: "تم حذف الكفالة بنجاح" });
+    return sendSuccess(res, null, "تم حذف الكفالة بنجاح");
   } catch (error) {
-    const status = error.statusCode || 500;
-    res.status(status).json({ success: false, message: getClientErrorMessage(error) });
+    return sendError(res, getClientErrorMessage(error), error.statusCode || 500);
   }
 };
 
 const updateSponsorshipStatus = async (req, res) => {
   try {
-    const validatedData = sponsorShipSchema.partial().parse(req.body);
-
+    const validatedData = sponsorshipStatusSchema.parse(req.body);
     const sponsorship = await sponsorshipService.updateStatus(
       req.params.id,
       validatedData.status
     );
-
-    res.status(200).json({
-      success: true,
-      data: sponsorship,
-    });
+    return sendSuccess(res, sponsorship);
   } catch (error) {
-    const status = error.statusCode || 500;
-
-    res.status(status).json({
-      success: false,
-      message: getClientErrorMessage(error),
-    });
+    if (error.name === "ZodError") {
+      return sendError(res, "Validation Error", 400, error.issues || []);
+    }
+    return sendError(res, getClientErrorMessage(error), error.statusCode || 500);
   }
 };
 

@@ -4,13 +4,27 @@ const defineSponsor = require("./sponsors/sponsors");
 const defineSponsorship = require("./sponsorShip/sponsorShip");
 const defineOrphan = require("./orphans/orphans");
 const defineSponsorshipRequest = require("./sponsorshipRequest/sponsorshipRequest");
+const defineRepresentative = require("./Representative/Representative");
 
 const SponsorshipRequest = defineSponsorshipRequest(sequelize);
 const Sponsor = defineSponsor(sequelize);
 const Sponsorship = defineSponsorship(sequelize);
 const Orphan = defineOrphan(sequelize);
+const Representative = defineRepresentative(sequelize);
 
-const models = { sequelize, Sponsor, Sponsorship, Orphan,SponsorshipRequest };
+const HelpRequest = require("./helpRequests/helpRequests");
+const Guardian = require("./guardian/guardian");
+
+const models = {
+  sequelize,
+  Sponsor,
+  Sponsorship,
+  Orphan,
+  SponsorshipRequest,
+  Representative,
+  HelpRequest,
+  Guardian,
+};
 
 if (typeof Sponsor.associate === "function") {
   Sponsor.associate(models);
@@ -18,8 +32,11 @@ if (typeof Sponsor.associate === "function") {
 if (typeof Sponsorship.associate === "function") {
   Sponsorship.associate(models);
 }
-  if (typeof SponsorshipRequest.associate === "function") {
+if (typeof SponsorshipRequest.associate === "function") {
   SponsorshipRequest.associate(models);
-} 
+}
+if (typeof Representative.associate === "function") {
+  Representative.associate(models);
+}
 
 module.exports = models;

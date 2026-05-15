@@ -1,4 +1,5 @@
 const { DataTypes } = require("sequelize");
+const { encrypt } = require("../../utils/crypto");
 
 module.exports = (sequelize) => {
   const Sponsorship = sequelize.define(
@@ -72,7 +73,7 @@ module.exports = (sequelize) => {
         comment: "رقم الفرع",
       },
       accountNumber: {
-        type: DataTypes.STRING(50),
+        type: DataTypes.TEXT,
         allowNull: true,
         comment: "رقم الحساب البنكي",
       },
@@ -82,7 +83,7 @@ module.exports = (sequelize) => {
         comment: "اسم صاحب الحساب",
       },
       iban: {
-        type: DataTypes.STRING(34),
+        type: DataTypes.TEXT,
         allowNull: true,
         comment: "IBAN",
       },
@@ -105,8 +106,37 @@ module.exports = (sequelize) => {
       timestamps: true,
       paranoid: true,
       underscored: true,
+      validate: {
+        bankTransferHasPaymentDetails() {
+          if (this.paymentMethod === "bank_transfer") {
+            if (!this.bankName || !this.branchNumber || !this.accountNumber || !this.accountHolderName || !this.iban) {
+              throw new Error(
+                "bankName, branchNumber, accountNumber, accountHolderName, and iban are required when paymentMethod is bank_transfer"
+              );
+            }
+          }
+        },
+      },
     }
   );
+
+  Sponsorship.beforeCreate((record) => {
+    if (record.accountNumber) {
+      record.accountNumber = encrypt(record.accountNumber);
+    }
+    if (record.iban) {
+      record.iban = encrypt(record.iban);
+    }
+  });
+
+  Sponsorship.beforeUpdate((record) => {
+    if (record.accountNumber) {
+      record.accountNumber = encrypt(record.accountNumber);
+    }
+    if (record.iban) {
+      record.iban = encrypt(record.iban);
+    }
+  });
 
   // ─── العلاقات حسب الـ ERD ────────────────────────────
   Sponsorship.associate = (models) => {
