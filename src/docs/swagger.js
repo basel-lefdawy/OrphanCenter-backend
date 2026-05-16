@@ -31,6 +31,7 @@ const swaggerDefinition = {
   tags: [
     { name: "System", description: "Health and API root checks" },
     { name: "Auth", description: "Facebook OAuth and JWT auth routes" },
+    { name: "Chatbot", description: "Public AI chatbot endpoint" },
     { name: "Admin Dashboard", description: "Admin dashboard summary" },
     { name: "Help Requests", description: "Public help request submission and lookup" },
     { name: "Admin Help Requests", description: "Admin help request review workflow" },
@@ -70,6 +71,69 @@ const swaggerDefinition = {
             content: {
               "application/json": {
                 schema: { $ref: "#/components/schemas/ApiRootResponse" },
+              },
+            },
+          },
+        },
+      },
+    },
+    "/api/chatbot": {
+      post: {
+        tags: ["Chatbot"],
+        summary: "Send a message to the chatbot",
+        description:
+          "Public endpoint used by the frontend chatbot widget. It accepts a single user message and returns a chatbot reply. If Gemini is not configured, the current implementation returns a safe fallback reply with a successful response instead of exposing provider details.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ChatbotRequestBody" },
+              example: {
+                message: "كيف يمكنني تقديم طلب مساعدة؟",
+              },
+            },
+          },
+        },
+        responses: {
+          200: {
+            description:
+              "Chatbot reply generated. The reply may be a normal AI response or a safe fallback message when Gemini is not configured.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ChatbotResponse" },
+                examples: {
+                  success: {
+                    summary: "Successful chatbot reply",
+                    value: {
+                      success: true,
+                      message: "Chatbot reply generated",
+                      data: {
+                        reply:
+                          "يمكنك تقديم طلب مساعدة من خلال صفحة طلب المساعدة في الموقع، ثم تعبئة البيانات المطلوبة وإرسال الطلب للمراجعة.",
+                      },
+                    },
+                  },
+                  missingGeminiKeyFallback: {
+                    summary: "Fallback reply when Gemini API key is missing",
+                    value: {
+                      success: true,
+                      message: "Chatbot reply generated",
+                      data: {
+                        reply:
+                          "المساعد الذكي غير مفعّل حالياً. يمكنك طرح أسئلة عامة عن طلب المساعدة أو التبرع أو الكفالة أو التواصل مع المركز.",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          500: {
+            description:
+              "Unexpected server error while handling the chatbot request.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ApiError" },
               },
             },
           },

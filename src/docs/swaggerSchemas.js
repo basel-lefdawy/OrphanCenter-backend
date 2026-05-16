@@ -259,6 +259,45 @@ const schemas = {
       },
     ],
   },
+  ChatbotRequestBody: {
+    type: "object",
+    required: ["message"],
+    properties: {
+      message: {
+        type: "string",
+        example: "كيف يمكنني تقديم طلب مساعدة؟",
+        description: "User question sent to the public chatbot endpoint.",
+      },
+    },
+  },
+  ChatbotReplyData: {
+    type: "object",
+    required: ["reply"],
+    properties: {
+      reply: {
+        type: "string",
+        example:
+          "يمكنك تقديم طلب مساعدة من خلال صفحة طلب المساعدة في الموقع، ثم تعبئة البيانات المطلوبة وإرسال الطلب للمراجعة.",
+      },
+    },
+  },
+  ChatbotResponse: {
+    type: "object",
+    required: ["success", "message", "data"],
+    properties: {
+      success: { type: "boolean", example: true },
+      message: { type: "string", example: "Chatbot reply generated" },
+      data: { $ref: "#/components/schemas/ChatbotReplyData" },
+    },
+    example: {
+      success: true,
+      message: "Chatbot reply generated",
+      data: {
+        reply:
+          "يمكنك تقديم طلب مساعدة من خلال صفحة طلب المساعدة في الموقع، ثم تعبئة البيانات المطلوبة وإرسال الطلب للمراجعة.",
+      },
+    },
+  },
   DashboardResponse: {
     type: "object",
     required: ["success", "message", "data"],
