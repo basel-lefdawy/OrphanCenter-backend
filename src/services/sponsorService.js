@@ -1,8 +1,14 @@
-const { Sponsor, Sponsorship } = require("../models");
+const { Sponsor, Sponsorship, Orphan } = require("../models");
 
 const SPONSORSHIP_INCLUDE = {
   model: Sponsorship,
   as: "sponsorships",
+  include: [
+    {
+      model: Orphan,
+      as: "orphan",
+    },
+  ],
 };
 
 function httpError(statusCode, message) {

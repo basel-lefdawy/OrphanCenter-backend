@@ -33,7 +33,7 @@ HelpRequest.belongsTo(User, {
 
 // sync DB
 const syncDB = async () => {
-  await sequelize.sync({ alter: true });
+  await sequelize.sync();
   console.log("DB Synced");
 };
 

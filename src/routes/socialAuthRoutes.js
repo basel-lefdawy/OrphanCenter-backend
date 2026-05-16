@@ -2,21 +2,12 @@ const express = require("express");
 const { passport } = require("../config/passport");
 const authController = require("../controllers/socialAuthControllers");
 const requireAuth = require("../middleware/requireAuth");
-const { sendError } = require("../utils/apiResponse");
+const requireOAuthStrategy = require("../middleware/requireOAuthStrategy");
 const router = express.Router();
 
-const requireOAuthStrategy = (strategyName) => (req, res, next) => {
-  if (!passport._strategy(strategyName)) {
-    return sendError(
-      res,
-      `${strategyName} OAuth is not configured on the server.`,
-      503
-    );
-  }
-  return next();
-};
-
 // ─── Facebook ─────────────────────────────────────────────────────────────────
+
+// redirecting to Facebook's login page
 router.get(
   "/facebook",
   requireOAuthStrategy("facebook"),
@@ -26,6 +17,7 @@ router.get(
   })
 );
 
+// after facebook redirects back to us, passport will authenticate and then call our controller
 router.get(
   "/facebook/callback",
   requireOAuthStrategy("facebook"),

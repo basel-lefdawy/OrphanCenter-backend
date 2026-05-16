@@ -184,27 +184,13 @@ const approve = async (id) => {
     return { req, guardian, orphan };
 
   } catch (error) {
+
     if (!t.finished) {
       await t.rollback();
     }
 
     if (error.name === "SequelizeUniqueConstraintError") {
-      const messages = error.errors.map((e) => {
-        switch (e.path) {
-          case "email":
-            return "البريد الإلكتروني مسجل مسبقاً";
-          case "phoneNumber":
-            return "رقم الهاتف مسجل مسبقاً";
-          case "GuardianID":
-            return "رقم هوية الوصي مسجل مسبقاً";
-          case "OrphanID":
-            return "رقم هوية اليتيم مسجل مسبقاً";
-          default:
-            return `${e.path} مسجل مسبقاً`;
-        }
-      });
-
-      throw httpError(409, messages.join(" | "));
+      throw httpError(409, "رقم هوية اليتيم مسجل مسبقاً");
     }
 
     throw error;
