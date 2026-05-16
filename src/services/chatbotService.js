@@ -2,7 +2,9 @@ const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 const MAX_MESSAGE_LENGTH = 500;
 const CHATBOT_DEBUG = process.env.CHATBOT_DEBUG !== "false";
-
+// this file contains the main logic for interacting with the Gemini API, 
+// including prompt construction, response parsing, error handling, and retry logic for transient errors. 
+// It exports a single function getChatbotReply that takes a user message and returns the chatbot's reply or throws an error if something goes wrong.
 const MISSING_KEY_FALLBACK =
   "المساعد الذكي غير مفعّل حالياً. يمكنك طرح أسئلة عامة عن طلب المساعدة أو التبرع أو الكفالة أو التواصل مع المركز.";
 
@@ -12,11 +14,11 @@ const RATE_LIMIT_MESSAGE =
   "المساعد الذكي غير متاح مؤقتاً بسبب كثرة الطلبات، يرجى المحاولة لاحقاً.";
 
 const RETRYABLE_STATUS_CODES = new Set([500, 502, 503, 504]);
-
+// Helper for delaying execution (used for retry backoff)
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
+// Helper function for consistent debug logging
 function debugLog(label, value) {
   if (!CHATBOT_DEBUG) {
     return;
@@ -27,14 +29,14 @@ function debugLog(label, value) {
     value,
   });
 }
-
+// Helper to create a standardized error object for chatbot-related errors
 function createChatbotError(message, statusCode = 503, details = null) {
   const error = new Error(message);
   error.statusCode = statusCode;
   error.details = details;
   return error;
 }
-
+// Helper to mask API keys in logs, showing only the first 6 and last 4 characters
 function maskApiKey(key) {
   if (!key) {
     return "missing";
@@ -72,7 +74,7 @@ function buildPrompt(message) {
 ${message}
 `.trim();
 }
-
+// Helper to normalize the user messages to prevent excessively long inputs
 function normalizeMessage(message) {
   if (typeof message !== "string") {
     return "";
@@ -80,7 +82,7 @@ function normalizeMessage(message) {
 
   return message.trim().slice(0, MAX_MESSAGE_LENGTH);
 }
-
+// Helper to extract the chatbot's reply text from the Gemini API response structure
 function extractGeminiText(data) {
   return (
     data?.candidates?.[0]?.content?.parts
@@ -89,11 +91,11 @@ function extractGeminiText(data) {
       .trim() || ""
   );
 }
-
+// Helper to determine if a response status code is retryable (e.g., transient server errors)
 function isRetryableResponse(response) {
   return RETRYABLE_STATUS_CODES.has(response.status);
 }
-
+// Main function to get a reply from the chatbot based on the user's message
 async function requestGemini(prompt) {
   return fetch(`${GEMINI_API_URL}?key=${process.env.GEMINI_API_KEY}`, {
     method: "POST",
@@ -121,7 +123,7 @@ async function requestGemini(prompt) {
     }),
   });
 }
-
+// Main function to get a reply from the chatbot based on the user's message, with error handling and retry logic
 async function getChatbotReply(message) {
   const normalizedMessage = normalizeMessage(message);
   debugLog("incoming message", normalizedMessage);

@@ -1,6 +1,6 @@
 const { getChatbotReply } = require("../services/chatbotService");
 const { sendSuccess } = require("../utils/apiResponse");
-
+// Controller to handle sending a message to the chatbot and getting a reply
 async function sendChatbotMessage(req, res, next) {
   try {
     console.log("[chatbot] /api/chatbot request", {
