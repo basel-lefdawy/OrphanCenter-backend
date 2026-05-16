@@ -83,6 +83,56 @@ module.exports = {
       },
     ]);
 
+    const [sponsors] = await queryInterface.sequelize.query(
+      "SELECT id, identity_number FROM sponsors WHERE identity_number IN ('SPN1001', 'SPN1002', 'SPN1003')"
+    );
+    const [orphans] = await queryInterface.sequelize.query(
+      "SELECT id, orphan_id FROM orphans WHERE orphan_id IN ('ORH001', 'ORH002', 'ORH003')"
+    );
+
+    const sponsorByIdentity = new Map(
+      sponsors.map((sponsor) => [sponsor.identity_number, sponsor.id])
+    );
+    const orphanByCode = new Map(
+      orphans.map((orphan) => [orphan.orphan_id, orphan.id])
+    );
+
+    await queryInterface.bulkInsert('sponsorships', [
+      {
+        sponsor_id: sponsorByIdentity.get('SPN1001'),
+        orphan_id: orphanByCode.get('ORH001'),
+        monthly_s_amount: 250,
+        starting_s_date: '2026-01-01',
+        end_s_date: null,
+        payment_method: 'cash',
+        status: 'active',
+        created_at: now,
+        updated_at: now,
+      },
+      {
+        sponsor_id: sponsorByIdentity.get('SPN1002'),
+        orphan_id: orphanByCode.get('ORH002'),
+        monthly_s_amount: 180,
+        starting_s_date: '2026-02-01',
+        end_s_date: null,
+        payment_method: 'cash',
+        status: 'active',
+        created_at: now,
+        updated_at: now,
+      },
+      {
+        sponsor_id: sponsorByIdentity.get('SPN1003'),
+        orphan_id: orphanByCode.get('ORH003'),
+        monthly_s_amount: 300,
+        starting_s_date: '2026-03-01',
+        end_s_date: null,
+        payment_method: 'cash',
+        status: 'active',
+        created_at: now,
+        updated_at: now,
+      },
+    ]);
+
     await queryInterface.bulkInsert('Donations', [
       {
         donationNumber: 'DASH-DON-001',
@@ -343,6 +393,16 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
+    const [sponsors] = await queryInterface.sequelize.query(
+      "SELECT id FROM sponsors WHERE identity_number IN ('SPN1001', 'SPN1002', 'SPN1003')"
+    );
+
+    await queryInterface.bulkDelete('sponsorships', {
+      sponsor_id: {
+        [Sequelize.Op.in]: sponsors.map((sponsor) => sponsor.id),
+      },
+    });
+
     await queryInterface.bulkDelete('HelpRequests', {
       OrphanID: {
         [Sequelize.Op.in]: [
