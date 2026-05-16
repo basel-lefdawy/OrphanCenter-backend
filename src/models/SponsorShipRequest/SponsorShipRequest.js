@@ -209,7 +209,7 @@ module.exports = (sequelize) => {
       },
       userId: {
         type: DataTypes.INTEGER,
-        allowNull: true,
+        allowNull: false,
       }
     },
     {
@@ -257,10 +257,20 @@ module.exports = (sequelize) => {
     });
   };
   user.hasMany(SponsorshipRequest, {
-    foreignKey: "userId",
+    foreignKey: {
+      name: "userId",
+      allowNull: false,
+    },
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   });
   SponsorshipRequest.belongsTo(user, {
-    foreignKey: "userId",
+    foreignKey: {
+      name: "userId",
+      allowNull: false,
+    },
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   });
   return SponsorshipRequest;
 };

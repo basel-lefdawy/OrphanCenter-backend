@@ -16,6 +16,7 @@ const sponsorshipRequestAdminRoutes = require("./sponsorshipRequestAdminRoutes")
 const sponsorRoutes = require("./SponsorRoutes");
 const sponsorShipRoutes = require("./SponsorShipRoutes");
 const orphanAdminRoutes = require("./orphanAdminRoutes");
+const chatbotRoutes = require("./chatbotRoutes");
 
 const router = express.Router();
 
@@ -38,6 +39,7 @@ router.use("/orphans", orphanRoutes);
 router.use("/sponsors", sponsorRoutes);
 router.use("/sponsorships", sponsorShipRoutes);
 router.use("/sponsorship-requests", sponsorshipRequestRoutes);
+router.use("/chatbot", chatbotRoutes);
 
 // ADMIN
 router.use("/admin/dashboard", requireAuth, requireAdmin, dashboardRoutes);
