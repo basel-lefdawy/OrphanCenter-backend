@@ -16,7 +16,6 @@ module.exports = (sequelize) => {
       identityNumber: {
         type: DataTypes.STRING(20),
         allowNull: false,
-        unique: true,
         comment: "رقم الهوية",
       },
       firstName: {
@@ -82,17 +81,7 @@ module.exports = (sequelize) => {
       email: {
         type: DataTypes.STRING(100),
         allowNull: false,
-        unique: true,
         comment: "البريد الإلكتروني",
-      },
-
-      representativeId: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        references: { model: "representatives", key: "id" },
-        onUpdate: "CASCADE",
-        onDelete: "SET NULL",
-        comment: "المنفذ الذي يمثّل الكفيل",
       },
 
       // ─── معلومات المفوّض (inline) ────────────────────────
@@ -176,7 +165,7 @@ module.exports = (sequelize) => {
     }
   );
 
-  // ─── العلاقات حسب الـ ERD ────────────────────────────
+// ─── العلاقات حسب الـ ERD ────────────────────────────
   Sponsor.associate = (models) => {
     // Sponsor M ── M Orphan عبر Sponsorship
     Sponsor.hasMany(models.Sponsorship, {
@@ -190,6 +179,11 @@ module.exports = (sequelize) => {
       as: "representative",
     });
   };
+
+
+
+
+
 
   return Sponsor;
 };
