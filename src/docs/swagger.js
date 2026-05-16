@@ -1,6 +1,7 @@
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const schemas = require("./swaggerSchemas");
+// Paths are defined in separate files for modularity and clarity, then merged into the main swaggerDefinition.paths object.
 const sponsorSponsorshipPaths = require("./swaggerPathsSponsorsSponsorships");
 
 const swaggerDefinition = {

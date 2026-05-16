@@ -1,4 +1,3 @@
-const { fn, col } = require("sequelize");
 const { Orphan, Sponsor, Sponsorship } = require("../models");
 const Donation = require("../models/donations/donations");
 const HelpRequest = require("../models/helpRequests/helpRequests");
@@ -17,6 +16,7 @@ function getErrorMessage(error) {
   return error?.message || error?.name || "Unknown database/query error";
 }
 
+// getDashboardSummary safely queries all required data and handles missing models or query errors gracefully
 async function safeFindAll(model, modelName) {
   if (!isQueryableModel(model)) {
     return {
@@ -36,6 +36,7 @@ async function safeFindAll(model, modelName) {
   }
 }
 
+// evaluate sponsored orphan count with error handling and fallback value
 async function safeSponsoredOrphanCount() {
   if (!Sponsorship || typeof Sponsorship.count !== "function") {
     return {
@@ -59,6 +60,7 @@ async function safeSponsoredOrphanCount() {
   }
 }
 
+// Main function to get dashboard summary with robust error handling and fallback values
 async function getDashboardSummary() {
   const [
     orphansResult,

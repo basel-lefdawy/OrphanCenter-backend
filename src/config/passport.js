@@ -3,7 +3,7 @@ const passport = require("passport");
 const FacebookStrategy = require("passport-facebook").Strategy;
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../models/auth/user");
-
+// This file configures Passport strategies,validating,take info for Facebook and Google OAuth.
 function configurePassport() {
 
   // ─── Facebook ───────────────────────────────────────────────────────────────
