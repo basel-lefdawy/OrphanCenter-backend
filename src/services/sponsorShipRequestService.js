@@ -1,4 +1,3 @@
-const { Op } = require("sequelize");
 const { SponsorshipRequest, Sponsor, Sponsorship, Representative, Orphan, sequelize } = require("../models");
 const { decrypt } = require("../utils/crypto");
 
@@ -148,7 +147,9 @@ const updateStatus = async (id, status) => {
 };
 
 const approve = async (id) => {
-  return sequelize.transaction(async (transaction) => {
+  const transaction = await sequelize.transaction();
+
+  try {
     const request = await SponsorshipRequest.findByPk(id, {
       include: [REQUEST_INCLUDE],
       transaction,
@@ -156,39 +157,13 @@ const approve = async (id) => {
     });
 
     if (!request) {
+      await transaction.rollback();
       throw httpError(404, "طلب الكفالة غير موجود");
     }
 
     if (request.status !== "pending") {
+      await transaction.rollback();
       throw httpError(409, "الطلب تمت معالجته مسبقاً");
-    }
-
-    const existingSponsor = await Sponsor.findOne({
-      where: {
-        [Op.or]: [
-          { identityNumber: request.identityNumber },
-          { email: request.email },
-        ],
-      },
-      transaction,
-      lock: transaction.LOCK.UPDATE,
-    });
-
-    if (existingSponsor) {
-      throw httpError(409, "رقم الهوية أو البريد الإلكتروني للكفيل مسجل مسبقاً");
-    }
-
-    const activeSponsorship = await Sponsorship.findOne({
-      where: {
-        orphanId: request.orphanId,
-        status: "active",
-      },
-      transaction,
-      lock: transaction.LOCK.UPDATE,
-    });
-
-    if (activeSponsorship) {
-      throw httpError(409, "يوجد كفالة نشطة لهذا اليتيم بالفعل");
     }
 
     const sponsor = await Sponsor.create(
@@ -253,13 +228,20 @@ const approve = async (id) => {
     }
 
     await request.update({ status: "approved" }, { transaction });
+    await transaction.commit();
 
     return {
       sponsor,
       sponsorship: decryptSponsorship(sponsorship),
       representative,
     };
-  });
+  } catch (error) {
+    if (!transaction.finished) {
+      await transaction.rollback();
+    }
+
+    throw error;
+  }
 };
 
 const reject = async (id) => {
