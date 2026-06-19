@@ -2,6 +2,28 @@
 
 module.exports = {
   async up(queryInterface, Sequelize) {
+    await queryInterface.bulkDelete('orphans', {
+      OrphanID: {
+        [Sequelize.Op.in]: [
+          'ORH001',
+          'ORH002',
+          'ORH003',
+          'ORH004',
+          'ORH005',
+          'ORH006',
+          'ORH007',
+          'ORH008',
+          'ORH009',
+          'ORH010',
+          'ORH011',
+          'ORH012',
+          'ORH013',
+          'ORH014',
+          'ORH015',
+        ],
+      },
+    });
+
     await queryInterface.bulkInsert('orphans', [
       {
         OrphanID: 'ORH001',

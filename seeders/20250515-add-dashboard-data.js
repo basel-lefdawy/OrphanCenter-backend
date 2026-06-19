@@ -87,14 +87,14 @@ module.exports = {
       "SELECT id, identity_number FROM sponsors WHERE identity_number IN ('SPN1001', 'SPN1002', 'SPN1003')"
     );
     const [orphans] = await queryInterface.sequelize.query(
-      "SELECT id, orphan_id FROM orphans WHERE orphan_id IN ('ORH001', 'ORH002', 'ORH003')"
+      "SELECT id, OrphanID FROM orphans WHERE OrphanID IN ('ORH001', 'ORH002', 'ORH003')"
     );
 
     const sponsorByIdentity = new Map(
       sponsors.map((sponsor) => [sponsor.identity_number, sponsor.id])
     );
     const orphanByCode = new Map(
-      orphans.map((orphan) => [orphan.orphan_id, orphan.id])
+      orphans.map((orphan) => [orphan.OrphanID, orphan.id])
     );
 
     await queryInterface.bulkInsert('sponsorships', [

@@ -48,6 +48,11 @@ const generateTokenExpiry = (hours = 1) => {
     return expiresAt;
 };
 
+const buildClientUrl = (path) => {
+    const baseUrl = process.env.CLIENT_URL || "http://localhost:5173";
+    return new URL(path, baseUrl).toString();
+};
+
 // ─── Register ─────────────────────────────────────────────────────────────────
 
 const register = async ({ name, email, password }) => {
@@ -80,7 +85,7 @@ const register = async ({ name, email, password }) => {
             isEmailVerified: false,
         });
 
-    const verificationUrl = `${process.env.CLIENT_URL || "http://localhost:5173"}/auth/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`;
+    const verificationUrl = buildClientUrl(`/auth/verify-email?token=${verificationToken}&email=${encodeURIComponent(email)}`);
     await sendEmailVerificationEmail({
         to: user.email,
         name: user.name,

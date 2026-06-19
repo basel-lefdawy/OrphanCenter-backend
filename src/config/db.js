@@ -1,18 +1,17 @@
 require("dotenv").config();
 
 const { Sequelize } = require("sequelize");
+const configs = require("../../config/config");
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME || "orphancenter_db",
-  process.env.DB_USER || "root",
-  process.env.DB_PASSWORD || "rootpassword",
-  {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT || 3306,
-    dialect: process.env.DB_DIALECT || "mysql",
-    logging: process.env.DB_LOGGING === "true" ? console.log : false,
-  }
-);
+const env = process.env.NODE_ENV || "development";
+const config = configs[env];
+
+const sequelize = new Sequelize(config.database, config.username, config.password, {
+  host: config.host,
+  port: config.port,
+  dialect: config.dialect,
+  logging: process.env.DB_LOGGING === "true" ? console.log : false,
+});
 
 async function connectDB() {
   try {

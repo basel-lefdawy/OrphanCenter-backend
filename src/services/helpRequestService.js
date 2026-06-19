@@ -11,7 +11,8 @@ function httpError(statusCode, message) {
 }
 
 // CREATE
-const create = async (data) => {
+const create = async (data, userId) => {
+  console.log("[HelpRequestService] create called with userId:", userId);
 
   const exists = await HelpRequest.findOne({
     where: {
@@ -26,7 +27,12 @@ const create = async (data) => {
     );
   }
 
-  return await HelpRequest.create(data);
+  // Attach userId to the data before creating the record
+  const requestData = { ...data, userId };
+  console.log("[HelpRequestService] requestData before create:", { userId: requestData.userId });
+  const result = await HelpRequest.create(requestData);
+  console.log("[HelpRequestService] created record with userId:", result.userId);
+  return result;
 };
 
 // GET ALL (DECRYPT)

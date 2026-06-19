@@ -21,6 +21,8 @@ const createRequest = async (req, res) => {
     const validatedData =
       helpRequestSchema.parse(req.body);
     const userId = req.user.id; // I took it from requireAuth middleware
+    console.log("[HelpRequest Controller] req.user:", req.user);
+    console.log("[HelpRequest Controller] userId:", userId);
 
     const data =
       await HelpRequestService.create(
