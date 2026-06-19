@@ -55,6 +55,16 @@ const getPending = async () => {
   return requests.map(decryptRequest);
 };
 
+const getByUserId = async (userId) => {
+  const requests = await SponsorshipRequest.findAll({
+    where: { userId },
+    include: [REQUEST_INCLUDE],
+    order: [["createdAt", "DESC"]],
+  });
+
+  return requests.map(decryptRequest);
+};
+
 const getById = async (id) => {
   const request = await SponsorshipRequest.findByPk(id, {
     include: [REQUEST_INCLUDE],
@@ -263,6 +273,7 @@ const reject = async (id) => {
 module.exports = {
   getAll,
   getPending,
+  getByUserId,
   getById,
   create,
   update,

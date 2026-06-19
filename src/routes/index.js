@@ -17,6 +17,7 @@ const sponsorRoutes = require("./SponsorRoutes");
 const sponsorShipRoutes = require("./SponsorShipRoutes");
 const orphanAdminRoutes = require("./orphanAdminRoutes");
 const chatbotRoutes = require("./chatbotRoutes");
+const { getMyRequests } = require("../controllers/getMyRequests");
 
 const router = express.Router();
 
@@ -26,6 +27,9 @@ router.get("/", (req, res) => {
     version: "1.0.0",
   });
 });
+
+router.get("/my-requests", requireAuth, getMyRequests);
+router.get("/requests/my-requests", requireAuth, getMyRequests);
 
 router.use("/donations", donationRoutes.publicRouter);
 

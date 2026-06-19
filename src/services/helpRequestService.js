@@ -70,6 +70,23 @@ const getPending = async () => {
   });
 };
 
+const getByUserId = async (userId) => {
+  const data = await HelpRequest.findAll({
+    where: { userId },
+    order: [["createdAt", "DESC"]],
+  });
+
+  return data.map((r) => {
+    const obj = r.toJSON();
+
+    return {
+      ...obj,
+      IBAN: obj.IBAN ? decrypt(obj.IBAN) : null,
+      bankAccount: obj.bankAccount ? decrypt(obj.bankAccount) : null,
+    };
+  });
+};
+
 // GET BY ID
 const getById = async (id) => {
   const req = await HelpRequest.findByPk(id);
@@ -222,6 +239,7 @@ module.exports = {
   create,
   getAll,
   getPending,
+  getByUserId,
   getById,
   update,
   remove,
