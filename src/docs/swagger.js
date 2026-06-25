@@ -218,10 +218,7 @@ const swaggerDefinition = {
       post: {
         tags: ["Auth"],
         summary: "Refresh JWT tokens",
-        requestBody: {
-          required: true,
-          content: { "application/json": { schema: { $ref: "#/components/schemas/RefreshTokenBody" } } },
-        },
+        description: "Uses a refresh token from an HttpOnly secure cookie to issue a new access token.",
         responses: {
           200: {
             description: "Tokens refreshed successfully.",
@@ -238,10 +235,7 @@ const swaggerDefinition = {
       post: {
         tags: ["Auth"],
         summary: "Logout by revoking refresh token",
-        requestBody: {
-          required: true,
-          content: { "application/json": { schema: { $ref: "#/components/schemas/RefreshTokenBody" } } },
-        },
+        description: "Revokes the refresh token stored in an HttpOnly secure cookie and clears the cookie.",
         responses: {
           200: {
             description: "Logged out successfully.",

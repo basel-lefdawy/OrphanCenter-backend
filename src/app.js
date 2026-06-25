@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require("cookie-parser");
 
 const routes = require("./routes");
 const { setupSwagger } = require("./docs/swagger");
@@ -9,9 +10,12 @@ const { sendSuccess, sendError } = require("./utils/apiResponse");
 const app = express();
 configurePassport();
 
+const clientUrl = (process.env.CLIENT_URL || "http://localhost:5173").replace(/\/$/, "");
+
 // Middlewares
-app.use(cors());
+app.use(cors({ origin: clientUrl, credentials: true }));
 app.use(express.json());
+app.use(cookieParser());
 
 // Swagger
 app.use(passport.initialize());

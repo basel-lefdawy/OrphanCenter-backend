@@ -108,7 +108,6 @@ const schemas = {
         properties: {
           user: { $ref: "#/components/schemas/AuthUser" },
           accessToken: { type: "string", example: "eyJhbGciOi..." },
-          refreshToken: { type: "string", example: "eyJhbGciOi..." },
           message: { type: "string", example: "Verification email sent. Please check your inbox to complete registration." },
         },
         additionalProperties: true,

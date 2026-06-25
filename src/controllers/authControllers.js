@@ -1,6 +1,20 @@
 // controllers/auth.controller.js
 const authService = require("../services/authService");
 const { sendSuccess } = require("../utils/apiResponse");
+const { REFRESH_TOKEN_COOKIE_NAME, getRefreshTokenCookieOptions } = require("../config/cookie");
+
+const getRefreshTokenFromRequest = (req) => {
+    return req.cookies && req.cookies[REFRESH_TOKEN_COOKIE_NAME];
+};
+
+const setRefreshTokenCookie = (res, refreshToken) => {
+    if (!refreshToken) return;
+    res.cookie(REFRESH_TOKEN_COOKIE_NAME, refreshToken, getRefreshTokenCookieOptions());
+};
+
+const clearRefreshTokenCookie = (res) => {
+    res.clearCookie(REFRESH_TOKEN_COOKIE_NAME, getRefreshTokenCookieOptions());
+};
 
 // ─── Register ─────────────────────────────────────────────────────────────────
 
@@ -16,7 +30,12 @@ const register = async (req, res, next) => {
 const verifyEmail = async (req, res, next) => {
     try {
         const result = await authService.verifyEmail(req.body);
-        return sendSuccess(res, result, "Email verified successfully");
+        setRefreshTokenCookie(res, result.refreshToken);
+        const responseData = {
+            user: result.user,
+            accessToken: result.accessToken,
+        };
+        return sendSuccess(res, responseData, "Email verified successfully");
     } catch (err) {
         next(err);
     }
@@ -27,7 +46,12 @@ const verifyEmail = async (req, res, next) => {
 const login = async (req, res, next) => {
     try {
         const result = await authService.login(req.body);
-        return sendSuccess(res, result, "Logged in successfully");
+        setRefreshTokenCookie(res, result.refreshToken);
+        const responseData = {
+            user: result.user,
+            accessToken: result.accessToken,
+        };
+        return sendSuccess(res, responseData, "Logged in successfully");
     } catch (err) {
         next(err);
     }
@@ -37,7 +61,9 @@ const login = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
     try {
-        await authService.logout(req.body.refreshToken);
+        const refreshToken = getRefreshTokenFromRequest(req);
+        await authService.logout(refreshToken);
+        clearRefreshTokenCookie(res);
         return sendSuccess(res, null, "Logged out successfully");
     } catch (err) {
         next(err);
@@ -48,8 +74,13 @@ const logout = async (req, res, next) => {
 
 const refresh = async (req, res, next) => {
     try {
-        const tokens = await authService.refresh(req.body.refreshToken);
-        return sendSuccess(res, tokens, "Tokens refreshed successfully");
+        const refreshToken = getRefreshTokenFromRequest(req);
+        const tokens = await authService.refresh(refreshToken);
+        setRefreshTokenCookie(res, tokens.refreshToken);
+        const responseData = {
+            accessToken: tokens.accessToken,
+        };
+        return sendSuccess(res, responseData, "Tokens refreshed successfully");
     } catch (err) {
         next(err);
     }

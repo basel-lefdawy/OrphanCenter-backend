@@ -58,8 +58,14 @@ const buildClientUrl = (path) => {
 const register = async ({ name, email, password }) => {
     const existingUser = await User.findOne({ where: { email } });
 
-    if (existingUser && existingUser.isEmailVerified) {
-        throw createError("Email is already registered", 409);
+    if (existingUser) {
+        if (existingUser.provider !== "local") {
+            throw createError(`Email already registered with ${existingUser.provider}`, 409);
+        }
+
+        if (existingUser.isEmailVerified) {
+            throw createError("Email is already registered", 409);
+        }
     }
 
     const verificationToken = crypto.randomBytes(32).toString("hex");
